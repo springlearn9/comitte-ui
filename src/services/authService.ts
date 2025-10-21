@@ -33,11 +33,15 @@ export interface LoginResponse {
 }
 
 export interface MemberResponse {
-  id: string;
+  memberId: number;
   username: string;
   email: string;
+  name: string;
   mobile?: string;
-  createdAt: string;
+  aadharNo?: string;
+  address?: string;
+  createdTimestamp: string;
+  updatedTimestamp?: string;
 }
 
 class AuthService {

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Stack, Text, Button, Tabs, DialogRoot, DialogBackdrop, DialogPositioner, DialogContent, DialogHeader, DialogBody, DialogFooter, DialogTitle } from '@chakra-ui/react';
+import { Box, Stack, Text, Button, Tabs, DialogRoot, DialogBackdrop, DialogPositioner, DialogContent, DialogHeader, DialogBody, DialogFooter, DialogTitle, Input } from '@chakra-ui/react';
 import { Plus, Edit, Trash2, ChevronRight } from 'lucide-react';
 import CreateEditCommitteeModal from './CreateEditCommitteeModal';
 import type { CommitteeListItem, Committee } from '../../types/committee';
@@ -34,7 +34,7 @@ const formatCurrency = (value?: number | string) => {
   }
 };
 
-const CommitteeRow: React.FC<{ committee: CommitteeListItem; canManage?: boolean; onEdit?: (committee: CommitteeListItem) => void; onDelete?: (id: string) => void; onShowMembers?: (committee: CommitteeListItem) => void; onShowBids?: (committee: CommitteeListItem) => void; }>=({ committee, canManage=false, onEdit, onDelete, onShowMembers, onShowBids }) => {
+const CommitteeRow: React.FC<{ committee: CommitteeListItem; canManage?: boolean; onEdit?: (committee: CommitteeListItem) => void; onDelete?: (id: string) => void; onShowMembers?: (committee: CommitteeListItem) => void; onShowBids?: (committee: CommitteeListItem) => void; onAddMembers?: (committee: CommitteeListItem) => void; }>=({ committee, canManage=false, onEdit, onDelete, onShowMembers, onShowBids, onAddMembers }) => {
   const rightAmount = committee.monthlyShare != null ? formatCurrency(committee.monthlyShare) : committee.budget;
   const rightDate = formatDate(committee.createdAt);
   const bidsRatio = committee.bidsRatio;
@@ -68,6 +68,15 @@ const CommitteeRow: React.FC<{ committee: CommitteeListItem; canManage?: boolean
                color="blue.300" _hover={{ color: 'blue.200' }} fontSize="sm">
             Bids
           </Box>
+          {canManage && (
+            <>
+              <Text color="gray.500">•</Text>
+              <Box as="button" onClick={() => onAddMembers?.(committee)}
+                   color="green.300" _hover={{ color: 'green.200' }} fontSize="sm">
+                Add Members
+              </Box>
+            </>
+          )}
           {canManage && (
             <Box display="inline-flex" gap={2} ml={2}>
               <Box as="button" onClick={() => onEdit?.(committee)} title="Edit" p={1} _hover={{ bg: 'gray.700', color: 'blue.300' }} rounded="md" color="blue.400">
@@ -150,6 +159,7 @@ const Committees: React.FC = () => {
   // Popups state
   const [membersModal, setMembersModal] = useState<{ open: boolean; title: string; loading: boolean; items: MemberResponse[] }>({ open: false, title: '', loading: false, items: []});
   const [bidsModal, setBidsModal] = useState<{ open: boolean; title: string; loading: boolean; items: Bid[] }>({ open: false, title: '', loading: false, items: []});
+  const [addMembersModal, setAddMembersModal] = useState<{ open: boolean; committee: CommitteeListItem | null; searchText: string; loading: boolean; searchResults: MemberResponse[] }>({ open: false, committee: null, searchText: '', loading: false, searchResults: [] });
 
   // Resolve the memberId/ownerId used by backend; prefer 'memberId' from user, then search by username, then user.id
   useEffect(() => {
@@ -174,7 +184,7 @@ const Committees: React.FC = () => {
         if (user.username) {
           const results = await memberService.searchMembers({ username: user.username });
           if (results?.length) {
-            const m2 = tryParseId(results[0].id);
+            const m2 = tryParseId(results[0].memberId);
             if (m2) {
               setEffectiveMemberId(m2);
               console.debug('[Committees] Resolved memberId via search:', m2);
@@ -292,6 +302,72 @@ const Committees: React.FC = () => {
       setBidsModal({ open: true, title: `${committee.name} • Bids`, loading: false, items: data.map(mapBidResponse) });
     } catch (e) {
       setBidsModal({ open: true, title: `${committee.name} • Bids`, loading: false, items: [] });
+    }
+  };
+
+  const openAddMembers = (committee: CommitteeListItem) => {
+    setAddMembersModal({ open: true, committee, searchText: '', loading: false, searchResults: [] });
+  };
+
+  const searchMembers = async (searchText: string) => {
+    if (!searchText.trim()) {
+      setAddMembersModal(prev => ({ ...prev, searchResults: [] }));
+      return;
+    }
+    setAddMembersModal(prev => ({ ...prev, loading: true }));
+    try {
+      const results = await memberService.searchMembers({
+        name: searchText,
+        mobile: searchText,
+        username: searchText
+      });
+      setAddMembersModal(prev => ({ ...prev, loading: false, searchResults: results }));
+    } catch (e) {
+      setAddMembersModal(prev => ({ ...prev, loading: false, searchResults: [] }));
+    }
+  };
+
+  const attachMember = async (member: MemberResponse) => {
+    if (!addMembersModal.committee) return;
+    
+    const comitteId = Number(addMembersModal.committee.id);
+    const memberId = member.memberId;
+    
+    // Validate the IDs are valid numbers
+    if (!Number.isFinite(comitteId) || comitteId <= 0) {
+      console.error('Invalid committee ID:', addMembersModal.committee.id);
+      alert('Invalid committee ID');
+      return;
+    }
+    
+    if (!Number.isFinite(memberId) || memberId <= 0) {
+      console.error('Invalid member ID:', memberId);
+      alert('Invalid member ID');
+      return;
+    }
+    
+    try {
+      console.log('Adding member to committee:', {
+        comitteId,
+        memberId,
+        shareCount: 1
+      });
+      await committeeService.addMember(comitteId, memberId, 1);
+      // Close modal and refresh data
+      setAddMembersModal({ open: false, committee: null, searchText: '', loading: false, searchResults: [] });
+      // Refresh committees data
+      const [memberData, ownerData] = await Promise.all([
+        committeeService.getByMember(effectiveMemberId),
+        committeeService.getByOwner(effectiveMemberId),
+      ]);
+      setMemberCommittees(memberData.map(mapResponseToListItem));
+      setOwnerCommittees(ownerData.map(mapResponseToListItem));
+    } catch (e: any) {
+      console.error('Failed to add member:', e);
+      console.error('Error response:', e.response?.data);
+      console.error('Error status:', e.response?.status);
+      const errorMessage = e.response?.data?.message || e.message || 'Failed to add member to committee';
+      alert(`Error: ${errorMessage}`);
     }
   };
 
@@ -444,6 +520,7 @@ const Committees: React.FC = () => {
                 onDelete={handleDeleteCommittee}
                 onShowMembers={openMembers}
                 onShowBids={openBids}
+                onAddMembers={openAddMembers}
               />
             ))}
           </Stack>
@@ -476,8 +553,8 @@ const Committees: React.FC = () => {
               )}
               <Stack gap={2}>
                 {membersModal.items.map((m) => (
-                  <Box key={m.id} bg="gray.800" rounded="md" px={3} py={2} display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
-                    <Text color="white" fontSize="sm">{m.username}</Text>
+                  <Box key={m.memberId} bg="gray.800" rounded="md" px={3} py={2} display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
+                    <Text color="white" fontSize="sm">{m.name || m.username}</Text>
                     <Text color="gray.400" fontSize="sm" textAlign="right">{m.mobile || m.email}</Text>
                   </Box>
                 ))}
@@ -519,6 +596,58 @@ const Committees: React.FC = () => {
             </DialogBody>
             <DialogFooter>
               <Button onClick={() => setBidsModal(prev => ({ ...prev, open: false }))}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </DialogPositioner>
+      </DialogRoot>
+
+      {/* Add Members Modal */}
+      <DialogRoot open={addMembersModal.open} onOpenChange={(d) => !d.open && setAddMembersModal(prev => ({ ...prev, open: false }))}>
+        <DialogBackdrop bg="blackAlpha.700" backdropFilter="auto" backdropBlur="2px" />
+        <DialogPositioner inset="0" display="flex" alignItems="center" justifyContent="center" p={{ base: 4, sm: 6 }}>
+          <DialogContent bg="gray.900" color="white" maxW="lg" maxH="80dvh" overflowY="auto" borderColor="gray.700" borderWidth="1px" rounded="md">
+            <DialogHeader>
+              <DialogTitle><Text fontWeight="bold">Add Members to {addMembersModal.committee?.name}</Text></DialogTitle>
+            </DialogHeader>
+            <DialogBody>
+              <Stack gap={4}>
+                <Box>
+                  <Text fontSize="sm" fontWeight="medium" mb={2}>Search Members</Text>
+                  <Input
+                    placeholder="Enter name, mobile, or username"
+                    value={addMembersModal.searchText}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setAddMembersModal(prev => ({ ...prev, searchText: value }));
+                      searchMembers(value);
+                    }}
+                    bg="gray.800"
+                    borderColor="gray.700"
+                    _placeholder={{ color: 'gray.500' }}
+                    _focus={{ borderColor: 'red.500', boxShadow: '0 0 0 1px #ef4444' }}
+                  />
+                </Box>
+                {addMembersModal.loading && <Text color="gray.400">Searching…</Text>}
+                {!addMembersModal.loading && addMembersModal.searchResults.length === 0 && addMembersModal.searchText.trim() && (
+                  <Text color="gray.500" fontSize="sm">No members found.</Text>
+                )}
+                <Stack gap={2} maxH="300px" overflowY="auto">
+                  {addMembersModal.searchResults.map((member) => (
+                    <Box key={member.memberId} bg="gray.800" rounded="md" px={3} py={2} display="flex" alignItems="center" justifyContent="space-between">
+                      <Box>
+                        <Text color="white" fontSize="sm" fontWeight="medium">{member.name || member.username}</Text>
+                        <Text color="gray.400" fontSize="xs">{member.mobile || member.email}</Text>
+                      </Box>
+                      <Button size="sm" colorPalette="green" onClick={() => attachMember(member)}>
+                        Add
+                      </Button>
+                    </Box>
+                  ))}
+                </Stack>
+              </Stack>
+            </DialogBody>
+            <DialogFooter>
+              <Button onClick={() => setAddMembersModal(prev => ({ ...prev, open: false }))}>Close</Button>
             </DialogFooter>
           </DialogContent>
         </DialogPositioner>

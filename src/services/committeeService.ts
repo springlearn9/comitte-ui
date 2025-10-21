@@ -50,6 +50,16 @@ class CommitteeService {
   async delete(id: number): Promise<void> {
     await this.api.delete(`/comittes/${id}`);
   }
+
+  // POST /api/comitte-member-map
+  // Attaches a member to a committee with share count
+  async addMember(comitteId: number, memberId: number, shareCount: number = 1): Promise<void> {
+    await this.api.post('/comitte-member-map', {
+      comitteId,
+      memberId,
+      shareCount
+    });
+  }
 }
 
 export const committeeService = new CommitteeService();
