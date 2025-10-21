@@ -141,19 +141,35 @@ const Bids: React.FC = () => {
               {isOpen && (
                 <Stack gap={2} mt={2}>
                   {list.map((b) => (
-                    <Box key={b.id} display="flex" alignItems="center" justifyContent="space-between" bg="gray.800" rounded="md" px={3} py={2}>
-                      {/* Right: comitteNumber • bidDate • finalBidderName • amount */}
-                      <Box display="flex" alignItems="center" gap={4} ml="auto">
-                        <Box bg="gray.700" color="gray.100" px={2} py={0.5} rounded="full" fontSize="xs" minW={6} textAlign="center">
-                          {b.committeeNumber ?? '-'}
-                        </Box>
-                        <Text color="gray.500">•</Text>
-                        <Text color="gray.400" fontSize="sm">{formatDateTime(b.bidDate ?? b.createdAt)}</Text>
-                        <Text color="gray.500">•</Text>
-                        <Text color="gray.300" fontSize="sm">{b.finalBidderName && b.finalBidderName.trim() !== '' ? b.finalBidderName : '-'}</Text>
-                        <Text color="gray.500">•</Text>
-                        <Text color="white" fontWeight="semibold">₹{b.amount}</Text>
+                    <Box
+                      key={b.id}
+                      display="grid"
+                      gridTemplateColumns="36px 12px 110px 12px 1fr 12px 120px"
+                      alignItems="center"
+                      gap={0}
+                      bg="gray.800"
+                      rounded="md"
+                      px={3}
+                      py={2}
+                    >
+                      {/* Col 1: committee number pill */}
+                      <Box bg="gray.700" color="gray.100" px={2} py={0.5} rounded="full" fontSize="xs" textAlign="center">
+                        {b.committeeNumber ?? '-'}
                       </Box>
+                      {/* Col 2: bullet */}
+                      <Text color="gray.500" textAlign="center">•</Text>
+                      {/* Col 3: date (ddMonYYYY) */}
+                      <Text color="gray.400" fontSize="sm">{formatDateTime(b.bidDate ?? b.createdAt)}</Text>
+                      {/* Col 4: bullet */}
+                      <Text color="gray.500" textAlign="center">•</Text>
+                      {/* Col 5: final bidder name (fallback '-') */}
+                      <Text color="gray.300" fontSize="sm" lineClamp={1}>
+                        {b.finalBidderName && b.finalBidderName.trim() !== '' ? b.finalBidderName : '-'}
+                      </Text>
+                      {/* Col 6: bullet */}
+                      <Text color="gray.500" textAlign="center">•</Text>
+                      {/* Col 7: amount right-aligned */}
+                      <Text color="white" fontWeight="semibold" textAlign="right">₹{b.amount}</Text>
                     </Box>
                   ))}
                 </Stack>

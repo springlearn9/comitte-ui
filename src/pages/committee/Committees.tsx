@@ -290,12 +290,7 @@ const Committees: React.FC = () => {
           <Text as="h1" fontSize="2xl" fontWeight="bold" color="white" mb={2}>Committees</Text>
           <Text color="gray.400">Manage and view all committees</Text>
         </Box>
-        {activeTab === 'owned-committees' && (
-          <Button colorPalette="red" onClick={handleCreateCommittee}>
-            <Box mr={2} display="inline-flex"><Plus size={16} /></Box>
-            Add Committee
-          </Button>
-        )}
+        {/* Button moved to Owned tab header below */}
       </Box>
 
       {/* Tabs */}
@@ -382,9 +377,15 @@ const Committees: React.FC = () => {
         </Tabs.Content>
 
         <Tabs.Content value="owned-committees" paddingX={0}>
-          <Text color="gray.400" mb={4}>
-            Committees you own ({myOwnedCommittees.length} committees)
-          </Text>
+          <Box display="flex" alignItems="center" justifyContent="space-between" mb={4}>
+            <Text color="gray.400">
+              Committees you own ({myOwnedCommittees.length} committees)
+            </Text>
+            <Button colorPalette="red" rounded="full" onClick={handleCreateCommittee}>
+              <Box mr={2} display="inline-flex"><Plus size={16} /></Box>
+              Add Committee
+            </Button>
+          </Box>
           {myOwnedCommittees.length === 0 && !loading && !error && (
             <Text color="gray.500">You don't own any committees yet. Use the "Add Committee" button to create one.</Text>
           )}
