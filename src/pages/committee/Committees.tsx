@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Stack, Text, Button, Tabs } from '@chakra-ui/react';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Plus, Edit, Trash2, ChevronRight } from 'lucide-react';
 import CreateEditCommitteeModal from './CreateEditCommitteeModal';
 import type { CommitteeListItem, Committee } from '../../types/committee';
 import { committeeService } from '../../services/committeeService';
@@ -79,29 +79,31 @@ const CommitteeGroup: React.FC<{
   onEdit: (committee: CommitteeListItem) => void;
   onDelete: (id: string) => void;
 }> = ({ owner, committees, isExpanded, onToggle, onEdit, onDelete }) => (
-  <Box mb={6}>
+  <Box mb={6} bg="gray.900" borderColor="gray.800" borderWidth="1px" rounded="lg" p={2}>
     <Box
       display="flex"
       alignItems="center"
-      gap={3}
-      p={3}
-      bg="gray.800"
-      rounded="lg"
+      justifyContent="space-between"
+      px={2}
+      py={2}
       cursor="pointer"
-      _hover={{ bg: 'gray.700' }}
-      mb={3}
+      _hover={{ bg: 'gray.800' }}
+      rounded="md"
       onClick={onToggle}
     >
-      <Box flex="1">
-        <Text color="white" fontWeight="medium">{owner}</Text>
+      <Box display="flex" alignItems="center" gap={2} flex="1" minW={0}>
+        <ChevronRight
+          size={16}
+          color="#a3a3a3"
+          style={{ transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.15s ease' }}
+        />
+        <Text color="white" fontWeight="semibold" lineClamp={1}>{owner}</Text>
       </Box>
-      <Box as="span" bg="gray.700" color="gray.200" px={2} py={0.5} rounded="full" fontSize="xs">
-        {committees.length}
-      </Box>
+      <Text color="gray.400" fontSize="sm">{committees.length} committees</Text>
     </Box>
 
     {isExpanded && (
-      <Stack gap={3} ml={4}>
+      <Stack gap={3} mt={2}>
         {committees.map((committee) => (
           <CommitteeRow
             key={committee.id}

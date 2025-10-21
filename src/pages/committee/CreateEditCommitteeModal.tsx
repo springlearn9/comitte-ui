@@ -65,6 +65,25 @@ const CreateEditCommitteeModal: React.FC<CreateEditCommitteeModalProps> = ({
     }
   }, [isOpen, initialForm]);
 
+  // Auto-calculate monthlyAmount when totalAmount or maxMembers changes
+  React.useEffect(() => {
+    const total = Number(formData.totalAmount);
+    const members = Number(formData.maxMembers);
+    if (Number.isFinite(total) && total > 0 && Number.isFinite(members) && members > 0) {
+      const monthly = total / members;
+      const display = Number.isInteger(monthly) ? String(monthly) : String(Math.round(monthly));
+      if (formData.monthlyAmount !== display) {
+        setFormData(prev => ({ ...prev, monthlyAmount: display }));
+      }
+    } else {
+      if (formData.monthlyAmount !== '') {
+        setFormData(prev => ({ ...prev, monthlyAmount: '' }));
+      }
+    }
+    // Only react to these two dependencies to avoid loops
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData.totalAmount, formData.maxMembers]);
+
   // const categories = [...] // reserved for future use
 
   // const durations = [...] // reserved for future use
@@ -88,8 +107,7 @@ const CreateEditCommitteeModal: React.FC<CreateEditCommitteeModalProps> = ({
     const newErrors: Record<string, string> = {};
 
     if (!formData.name.trim()) newErrors.name = 'Committee name is required';
-    if (!formData.totalAmount.trim()) newErrors.totalAmount = 'Total amount is required';
-    if (!formData.monthlyAmount.trim()) newErrors.monthlyAmount = 'Monthly amount is required';
+  if (!formData.totalAmount.trim()) newErrors.totalAmount = 'Total amount is required';
     if (!formData.startDate) newErrors.startDate = 'Start date is required';
     if (!formData.maxMembers || Number(formData.maxMembers) < 2) newErrors.maxMembers = 'Minimum 2 members required';
     if (!formData.duration) newErrors.duration = 'Due days is required';
@@ -98,9 +116,7 @@ const CreateEditCommitteeModal: React.FC<CreateEditCommitteeModalProps> = ({
     if (formData.totalAmount && isNaN(Number(formData.totalAmount))) {
       newErrors.totalAmount = 'Please enter a valid amount';
     }
-    if (formData.monthlyAmount && isNaN(Number(formData.monthlyAmount))) {
-      newErrors.monthlyAmount = 'Please enter a valid amount';
-    }
+    // monthlyAmount is auto-calculated
     if (formData.duration && isNaN(Number(formData.duration))) {
       newErrors.duration = 'Please enter valid number of days';
     }
@@ -205,26 +221,6 @@ const CreateEditCommitteeModal: React.FC<CreateEditCommitteeModalProps> = ({
             </Box>
 
             <Box>
-              <Text fontSize="sm" fontWeight="medium" mb={2}>Monthly Amount</Text>
-              <Box position="relative">
-                <Box position="absolute" left={3} top="50%" transform="translateY(-50%)" color="gray.400">₹</Box>
-                <Input
-                  pl={8}
-                  placeholder="7000"
-                  value={formData.monthlyAmount}
-                  onChange={(e) => handleInputChange('monthlyAmount', e.target.value)}
-                  bg="gray.800"
-                  borderColor="gray.700"
-                  _placeholder={{ color: 'gray.500' }}
-                  _focus={{ borderColor: 'red.500', boxShadow: '0 0 0 1px #ef4444' }}
-                />
-              </Box>
-              {errors.monthlyAmount && (
-                <Text color="red.300" fontSize="xs" mt={1}>{errors.monthlyAmount}</Text>
-              )}
-            </Box>
-
-            <Box>
               <Text fontSize="sm" fontWeight="medium" mb={2}>Members Count</Text>
               <Input
                 type="number"
@@ -239,6 +235,23 @@ const CreateEditCommitteeModal: React.FC<CreateEditCommitteeModalProps> = ({
               {errors.maxMembers && (
                 <Text color="red.300" fontSize="xs" mt={1}>{errors.maxMembers}</Text>
               )}
+            </Box>
+
+            <Box>
+              <Text fontSize="sm" fontWeight="medium" mb={2}>Monthly Amount</Text>
+              <Box position="relative">
+                <Box position="absolute" left={3} top="50%" transform="translateY(-50%)" color="gray.400">₹</Box>
+                <Input
+                  pl={8}
+                  placeholder="7000"
+                  value={formData.monthlyAmount}
+                  disabled
+                  readOnly
+                  bg="gray.800"
+                  borderColor="gray.700"
+                  _placeholder={{ color: 'gray.500' }}
+                />
+              </Box>
             </Box>
 
             <Box>
