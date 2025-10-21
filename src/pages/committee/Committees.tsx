@@ -1,163 +1,73 @@
-import React, { useState } from 'react';
-import { Card, Button, Badge } from '@nextui-org/react';
+import React, { useEffect, useState } from 'react';
+import { Box, Stack, Text, Button, SimpleGrid } from '@chakra-ui/react';
 import { Plus, Users, Calendar, MapPin, Edit, Trash2 } from 'lucide-react';
 import CreateEditCommitteeModal from './CreateEditCommitteeModal';
-import type { CommitteeListItem } from '../../types/committee';
-import type { Committee } from '../../types/committee';
+import type { CommitteeListItem, Committee } from '../../types/committee';
+import { committeeService } from '../../services/committeeService';
+import { mapResponseToListItem, mapModalToRequest } from '../../types/committee';
+import { useAuth } from '../../hooks/useAuth';
+import { memberService } from '../../services/memberService';
 
-// Mock data for demonstration
-const mockCommittees: CommitteeListItem[] = [
-  {
-    id: '1',
-    name: '1.05L/ 15M/ 7000/ 10Jan24',
-    owner: 'Ajit Kastley',
-    members: 15,
-    description: 'Monthly savings committee',
-    createdAt: '2024-01-10',
-    budget: '₹10033',
-    location: 'Mumbai'
-  },
-  {
-    id: '2',
-    name: '1.05L/ 15M/ 7000/ 15Jan24',
-    owner: 'Ajit Kastley',
-    members: 15,
-    description: 'Investment committee',
-    createdAt: '2024-01-15',
-    budget: '₹10000',
-    location: 'Mumbai'
-  },
-  {
-    id: '3',
-    name: '2L/ 16M/ 12500/ 15Jan24',
-    owner: 'Bippan Khichra',
-    members: 16,
-    description: 'Large scale committee',
-    createdAt: '2024-01-15',
-    budget: '₹20593',
-    location: 'Delhi'
-  },
-  {
-    id: '4',
-    name: '2L/ 16M/ 12500/ 05Mar24',
-    owner: 'Bippan Khichra',
-    members: 16,
-    description: 'Spring committee',
-    createdAt: '2024-03-05',
-    budget: '₹20186',
-    location: 'Delhi'
-  },
-  {
-    id: '5',
-    name: '2.4L/ 15M/ 16000/ 10Nov24',
-    owner: 'Sanjay Tyagi',
-    members: 12,
-    description: 'High value committee',
-    createdAt: '2024-11-10',
-    budget: '₹35966',
-    location: 'Gurgaon'
-  },
-  {
-    id: '6',
-    name: '1.5L/ 15M/ 10000/ 10Mar25',
-    owner: 'Sanjay Tyagi',
-    members: 8,
-    description: 'Future planning committee',
-    createdAt: '2025-03-10',
-    budget: '₹12866',
-    location: 'Gurgaon'
-  },
-  {
-    id: '7',
-    name: '1.05L/ 15M/ 7000/ 10Dec24',
-    owner: 'Sundar Tyagi',
-    members: 10,
-    description: 'Year-end committee',
-    createdAt: '2024-12-10',
-    budget: '₹9800',
-    location: 'Noida'
-  },
-  {
-    id: '8',
-    name: '1.5L/ 15M/ 10000/ 10Jul25',
-    owner: 'Sundar Tyagi',
-    members: 3,
-    description: 'Summer committee',
-    createdAt: '2025-07-10',
-    budget: '₹4000',
-    location: 'Noida'
-  }
-];
 
-const CommitteeCard: React.FC<{ committee: CommitteeListItem; showOwner?: boolean; onEdit?: (committee: CommitteeListItem) => void; onDelete?: (id: string) => void }> = ({ 
+const CommitteeCard: React.FC<{ committee: CommitteeListItem; showOwner?: boolean; canManage?: boolean; onEdit?: (committee: CommitteeListItem) => void; onDelete?: (id: string) => void }> = ({ 
   committee, 
   showOwner = false,
+  canManage = false,
   onEdit,
   onDelete
 }) => (
-  <Card className="p-4 bg-gray-800 border-gray-700 hover:bg-gray-750 transition-colors">
-    <div className="flex items-center justify-between mb-3">
-      <div className="flex items-center gap-3">
-        <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center">
-          <span className="text-white font-semibold text-sm">
-            {committee.owner?.charAt(0) || 'C'}
-          </span>
-        </div>
+  <Box bg="gray.900" borderColor="gray.800" borderWidth="1px" rounded="lg" p={4} _hover={{ bg: 'gray.800' }}>
+    <Box display="flex" alignItems="center" justifyContent="space-between" mb={3}>
+      <Box display="flex" alignItems="center" gap={3}>
         {showOwner && (
-          <div>
-            <p className="text-sm font-medium text-white">{committee.owner}</p>
-            <Badge size="sm" color="default" variant="flat">
+          <Box>
+            <Text fontSize="sm" fontWeight="medium" color="white">{committee.owner}</Text>
+            <Box as="span" fontSize="xs" color="gray.300" bg="gray.700" px={2} py={0.5} rounded="full">
               {committee.members} members
-            </Badge>
-          </div>
+            </Box>
+          </Box>
         )}
-      </div>
-      <div className="flex items-center gap-2">
-        <div className="text-right">
-          <p className="text-lg font-bold text-white">{committee.budget}</p>
-          <p className="text-xs text-gray-400">{committee.createdAt}</p>
-        </div>
-        <div className="flex flex-col gap-1 ml-2">
-          <button 
-            onClick={() => onEdit?.(committee)}
-            className="p-1.5 hover:bg-gray-600 rounded text-blue-400 hover:text-blue-300 transition-colors"
-            title="Edit Committee"
-          >
-            <Edit className="w-4 h-4" />
-          </button>
-          <button 
-            onClick={() => committee.id && onDelete?.(committee.id)}
-            className="p-1.5 hover:bg-gray-600 rounded text-red-400 hover:text-red-300 transition-colors"
-            title="Delete Committee"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-    </div>
-    
-    <h3 className="text-white font-medium mb-2">{committee.name}</h3>
-    <p className="text-gray-400 text-sm mb-3">{committee.description}</p>
-    
-    <div className="flex items-center justify-between text-sm text-gray-400">
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-1">
-          <Users className="w-4 h-4" />
-          <span>{committee.members}</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <Calendar className="w-4 h-4" />
-          <span>{committee.createdAt}</span>
-        </div>
+      </Box>
+      <Box display="flex" alignItems="center" gap={2}>
+        <Box textAlign="right">
+          <Text fontSize="lg" fontWeight="bold" color="white">{committee.budget}</Text>
+          <Text fontSize="xs" color="gray.400">{committee.createdAt}</Text>
+        </Box>
+        {canManage && (
+          <Stack direction="column" gap={1} ml={2}>
+            <Box as="button" onClick={() => onEdit?.(committee)} title="Edit Committee" p={1.5} _hover={{ bg: 'gray.700', color: 'blue.300' }} rounded="md" color="blue.400">
+              <Edit size={16} />
+            </Box>
+            <Box as="button" onClick={() => committee.id && onDelete?.(committee.id)} title="Delete Committee" p={1.5} _hover={{ bg: 'gray.700', color: 'red.300' }} rounded="md" color="red.400">
+              <Trash2 size={16} />
+            </Box>
+          </Stack>
+        )}
+      </Box>
+    </Box>
+
+    <Text color="white" fontWeight="medium" mb={2}>{committee.name}</Text>
+    <Text color="gray.400" fontSize="sm" mb={3}>{committee.description}</Text>
+
+    <Box display="flex" alignItems="center" justifyContent="space-between" fontSize="sm" color="gray.400">
+      <Box display="flex" alignItems="center" gap={4}>
+        <Box display="flex" alignItems="center" gap={1}>
+          <Users size={16} />
+          <Text>{committee.members}</Text>
+        </Box>
+        <Box display="flex" alignItems="center" gap={1}>
+          <Calendar size={16} />
+          <Text>{committee.createdAt}</Text>
+        </Box>
         {committee.location && (
-          <div className="flex items-center gap-1">
-            <MapPin className="w-4 h-4" />
-            <span>{committee.location}</span>
-          </div>
+          <Box display="flex" alignItems="center" gap={1}>
+            <MapPin size={16} />
+            <Text>{committee.location}</Text>
+          </Box>
         )}
-      </div>
-    </div>
-  </Card>
+      </Box>
+    </Box>
+  </Box>
 );
 
 const CommitteeGroup: React.FC<{ 
@@ -168,25 +78,30 @@ const CommitteeGroup: React.FC<{
   onEdit: (committee: CommitteeListItem) => void;
   onDelete: (id: string) => void;
 }> = ({ owner, committees, isExpanded, onToggle, onEdit, onDelete }) => (
-  <div className="mb-6">
-    <div 
-      className="flex items-center gap-3 p-3 bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-750 transition-colors mb-3"
+  <Box mb={6}>
+    <Box
+      display="flex"
+      alignItems="center"
+      gap={3}
+      p={3}
+      bg="gray.800"
+      rounded="lg"
+      cursor="pointer"
+      _hover={{ bg: 'gray.700' }}
+      mb={3}
       onClick={onToggle}
     >
-      <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center">
-        <span className="text-white font-semibold text-sm">{owner.charAt(0)}</span>
-      </div>
-      <div className="flex-1">
-        <h3 className="text-white font-medium">{owner}</h3>
-        <p className="text-gray-400 text-sm">{committees.length} committees</p>
-      </div>
-      <Badge color="default" variant="flat">
+      <Box flex="1">
+        <Text color="white" fontWeight="medium">{owner}</Text>
+        <Text color="gray.400" fontSize="sm">{committees.length} committees</Text>
+      </Box>
+      <Box as="span" bg="gray.700" color="gray.200" px={2} py={0.5} rounded="full" fontSize="xs">
         {committees.length}
-      </Badge>
-    </div>
-    
+      </Box>
+    </Box>
+
     {isExpanded && (
-      <div className="space-y-3 ml-4">
+      <Stack gap={3} ml={4}>
         {committees.map((committee) => (
           <CommitteeCard 
             key={committee.id} 
@@ -195,24 +110,106 @@ const CommitteeGroup: React.FC<{
             onDelete={onDelete}
           />
         ))}
-      </div>
+      </Stack>
     )}
-  </div>
+  </Box>
 );
 
 const Committees: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<string>('my-committees');
+  const [activeTab, setActiveTab] = useState<'my-committees' | 'owned-committees'>('my-committees');
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
   const [selectedCommittee, setSelectedCommittee] = useState<Committee | null>(null);
-  const [committees, setCommittees] = useState<CommitteeListItem[]>(mockCommittees);
+  const [memberCommittees, setMemberCommittees] = useState<CommitteeListItem[]>([]);
+  const [ownerCommittees, setOwnerCommittees] = useState<CommitteeListItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
+  const [effectiveMemberId, setEffectiveMemberId] = useState<number>(0);
 
-  // Mock current user
-  const currentUser = 'Sanjay Tyagi';
+  // Resolve the memberId/ownerId used by backend; prefer 'memberId' from user, then search by username, then user.id
+  useEffect(() => {
+    const resolveMemberId = async () => {
+      if (!user) return;
+      try {
+        const tryParseId = (val: any): number | null => {
+          const n = Number(val);
+          return Number.isFinite(n) && n > 0 ? n : null;
+        };
 
-  // Group committees by owner for "My Committees" tab
-  const groupedCommittees = committees.reduce((groups, committee) => {
+        // Prefer explicit memberId if present on the user payload
+        const possibleMemberId = (user as any)?.memberId ?? (user as any)?.memberID ?? (user as any)?.member?.id;
+        const m1 = tryParseId(possibleMemberId);
+        if (m1) {
+          setEffectiveMemberId(m1);
+          console.debug('[Committees] Using memberId from user payload:', m1);
+          return;
+        }
+
+        // Search by username to resolve the backend member id
+        if (user.username) {
+          const results = await memberService.searchMembers({ username: user.username });
+          if (results?.length) {
+            const m2 = tryParseId(results[0].id);
+            if (m2) {
+              setEffectiveMemberId(m2);
+              console.debug('[Committees] Resolved memberId via search:', m2);
+              return;
+            }
+          }
+        }
+
+        // Fallback to auth user id
+        const m3 = tryParseId(user.id);
+        if (m3) {
+          setEffectiveMemberId(m3);
+          console.debug('[Committees] Falling back to user.id as memberId:', m3);
+          return;
+        }
+
+        console.warn('[Committees] Unable to resolve a valid member id from user or search', { user });
+      } catch (e) {
+        console.warn('Failed to resolve member id via search, falling back to auth id', e);
+        const n = Number(user?.id);
+        if (Number.isFinite(n) && n > 0) setEffectiveMemberId(n);
+      }
+    };
+    resolveMemberId();
+  }, [user]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        if (!Number.isFinite(effectiveMemberId) || effectiveMemberId <= 0) return;
+        setLoading(true);
+        setError(null);
+        const [memberData, ownerData] = await Promise.all([
+          committeeService.getByMember(effectiveMemberId),
+          committeeService.getByOwner(effectiveMemberId),
+        ]);
+        const memberItems = memberData.map(mapResponseToListItem);
+        const ownerItems = ownerData.map(mapResponseToListItem);
+        setMemberCommittees(memberItems);
+        setOwnerCommittees(ownerItems);
+        // If no member committees but there are owned committees, switch tab for visibility
+        if (memberItems.length === 0 && ownerItems.length > 0) {
+          setActiveTab('owned-committees');
+        }
+      } catch (e: any) {
+        console.error('Failed to load committees', e);
+        setError(e?.message || 'Failed to load committees');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [effectiveMemberId]);
+
+  // const currentUser = String(user?.id ?? '');
+
+  // Group member committees by owner for "My Committees" tab
+  const groupedCommittees = memberCommittees.reduce((groups, committee) => {
     const owner = committee.owner || 'Unknown';
     if (!groups[owner]) {
       groups[owner] = [];
@@ -221,31 +218,22 @@ const Committees: React.FC = () => {
     return groups;
   }, {} as Record<string, CommitteeListItem[]>);
 
-  // Filter committees owned by current user for "All Committees" tab
-  const myOwnedCommittees = committees.filter(
-    committee => committee.owner === currentUser
-  );
+  // Owned committees are loaded separately
+  const myOwnedCommittees = ownerCommittees;
 
   const toggleGroup = (owner: string) => {
-    const newExpanded = new Set(expandedGroups);
-    if (newExpanded.has(owner)) {
-      newExpanded.delete(owner);
-    } else {
-      newExpanded.add(owner);
-    }
-    setExpandedGroups(newExpanded);
+    const next = new Set(expandedGroups);
+    if (next.has(owner)) next.delete(owner); else next.add(owner);
+    setExpandedGroups(next);
   };
 
   const handleCreateCommittee = () => {
-    console.log('Create committee clicked'); // Debug log
     setModalMode('create');
     setSelectedCommittee(null);
     setIsModalOpen(true);
   };
 
   const handleEditCommittee = (committee: CommitteeListItem) => {
-    console.log('Edit committee clicked:', committee); // Debug log
-    // Convert CommitteeListItem to Committee for the modal
     const committeeForEdit: Committee = {
       id: committee.id,
       name: committee.name,
@@ -257,7 +245,7 @@ const Committees: React.FC = () => {
       location: committee.location || '',
       maxMembers: committee.members || 10,
       category: 'savings',
-      rules: ''
+      rules: '',
     };
     setModalMode('edit');
     setSelectedCommittee(committeeForEdit);
@@ -266,101 +254,82 @@ const Committees: React.FC = () => {
 
   const handleDeleteCommittee = (id: string) => {
     if (window.confirm('Are you sure you want to delete this committee?')) {
-      setCommittees(prev => prev.filter(c => c.id !== id));
+      committeeService.delete(Number(id))
+        .then(() => {
+          setOwnerCommittees(prev => prev.filter(c => c.id !== id));
+          setMemberCommittees(prev => prev.filter(c => c.id !== id));
+        })
+        .catch((e) => {
+          console.error('Delete failed', e);
+          alert('Failed to delete committee');
+        });
     }
   };
 
   const handleSaveCommittee = async (committeeData: Committee) => {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
+    const ownerId = effectiveMemberId;
+    if (!ownerId) return;
     if (modalMode === 'create') {
-      const newCommittee: CommitteeListItem = {
-        id: Date.now().toString(),
-        name: committeeData.name,
-        owner: currentUser,
-        members: 1,
-        description: committeeData.description,
-        createdAt: new Date().toISOString().split('T')[0],
-        budget: `₹${committeeData.totalAmount}`,
-        location: committeeData.location
-      };
-      setCommittees(prev => [...prev, newCommittee]);
+      const payload = mapModalToRequest(committeeData, ownerId);
+      const created = await committeeService.create(payload);
+      const item = mapResponseToListItem(created);
+      setOwnerCommittees(prev => [...prev, item]);
     } else if (selectedCommittee?.id) {
-      setCommittees(prev => 
-        prev.map(c => 
-          c.id === selectedCommittee.id 
-            ? { 
-                ...c, 
-                name: committeeData.name,
-                description: committeeData.description,
-                budget: `₹${committeeData.totalAmount}`,
-                location: committeeData.location
-              }
-            : c
-        )
-      );
+      const payload = mapModalToRequest(committeeData, ownerId);
+      const updated = await committeeService.update(Number(selectedCommittee.id), payload);
+      const item = mapResponseToListItem(updated);
+      setOwnerCommittees(prev => prev.map(c => c.id === item.id ? item : c));
+      setMemberCommittees(prev => prev.map(c => c.id === item.id ? item : c));
     }
   };
 
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-white mb-2">Committees</h1>
-          <p className="text-gray-400">Manage and view all committees</p>
-        </div>
-        <Button
-          startContent={<Plus className="w-4 h-4" />}
-          className="bg-white text-black hover:bg-gray-100 rounded-full px-6 py-2 font-medium shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
-          onPress={handleCreateCommittee}
-        >
+    <Box p={6}>
+      <Box display="flex" alignItems="center" justifyContent="space-between" mb={6}>
+        <Box>
+          <Text as="h1" fontSize="2xl" fontWeight="bold" color="white" mb={2}>Committees</Text>
+          <Text color="gray.400">Manage and view all committees</Text>
+        </Box>
+        <Button colorPalette="red" onClick={handleCreateCommittee}>
+          <Box mr={2} display="inline-flex"><Plus size={16} /></Box>
           Add Committee
         </Button>
-      </div>
-
-      {/* Test button to force modal open */}
-      <Button
-        className="mb-4 bg-red-600 text-white"
-        onPress={() => {
-          console.log('Test button clicked');
-          setIsModalOpen(true);
-        }}
-      >
-        Test Modal
-      </Button>
+      </Box>
 
       {/* Custom Tab Navigation */}
-      <div className="flex gap-2 mb-6">
-        <button
+      <Stack direction="row" gap={2} mb={6}>
+        <Button
+          variant={activeTab === 'my-committees' ? 'solid' : 'outline'}
+          colorPalette="red"
           onClick={() => setActiveTab('my-committees')}
-          className={`px-6 py-2 rounded-full font-medium transition-all duration-200 ${
-            activeTab === 'my-committees'
-              ? 'bg-gray-700 text-white shadow-lg'
-              : 'bg-gray-800 text-gray-300 hover:text-white hover:bg-gray-750'
-          }`}
         >
           My Committees
-        </button>
-        <button
-          onClick={() => setActiveTab('all-committees')}
-          className={`px-6 py-2 rounded-full font-medium transition-all duration-200 ${
-            activeTab === 'all-committees'
-              ? 'bg-gray-700 text-white shadow-lg'
-              : 'bg-gray-800 text-gray-300 hover:text-white hover:bg-gray-750'
-          }`}
+        </Button>
+        <Button
+          variant={activeTab === 'owned-committees' ? 'solid' : 'outline'}
+          colorPalette="red"
+          onClick={() => setActiveTab('owned-committees')}
         >
-          All Committees
-        </button>
-      </div>
+          Owned Committees
+        </Button>
+      </Stack>
 
       {/* Tab Content */}
+      {loading && (
+        <Text color="gray.400">Loading committees...</Text>
+      )}
+      {error && (
+        <Text color="red.400">{error}</Text>
+      )}
       {activeTab === 'my-committees' && (
-        <div>
-          <p className="text-gray-400 mb-4">
-            Committees grouped by owner ({Object.keys(groupedCommittees).length} owners)
-          </p>
-          
+        <Box>
+          <Text color="gray.400" mb={4}>
+            Committees you are part of, grouped by owner ({Object.keys(groupedCommittees).length} owners)
+          </Text>
+          {Object.keys(groupedCommittees).length === 0 && !loading && !error && (
+            <Text color="gray.500">You're not part of any committees yet.</Text>
+          )}
+
           {Object.entries(groupedCommittees).map(([owner, committees]) => (
             <CommitteeGroup
               key={owner}
@@ -372,61 +341,44 @@ const Committees: React.FC = () => {
               onDelete={handleDeleteCommittee}
             />
           ))}
-        </div>
+        </Box>
       )}
 
-      {activeTab === 'all-committees' && (
-        <div>
-          <p className="text-gray-400 mb-4">
-            Committees owned by you ({myOwnedCommittees.length} committees)
-          </p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {activeTab === 'owned-committees' && (
+        <Box>
+          <Text color="gray.400" mb={4}>
+            Committees you own ({myOwnedCommittees.length} committees)
+          </Text>
+          {myOwnedCommittees.length === 0 && !loading && !error && (
+            <Text color="gray.500">You don't own any committees yet. Use the "Add Committee" button to create one.</Text>
+          )}
+
+          <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap={4}>
             {myOwnedCommittees.map((committee) => (
               <CommitteeCard 
                 key={committee.id} 
                 committee={committee} 
                 showOwner={false} 
+                canManage
                 onEdit={handleEditCommittee}
                 onDelete={handleDeleteCommittee}
               />
             ))}
-          </div>
-        </div>
-      )}
-
-      {/* Simple test modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg">
-            <h2 className="text-black mb-4">Test Modal</h2>
-            <button 
-              onClick={() => setIsModalOpen(false)}
-              className="bg-red-600 text-white px-4 py-2 rounded"
-            >
-              Close
-            </button>
-          </div>
-        </div>
+          </SimpleGrid>
+        </Box>
       )}
 
       {/* Create/Edit Committee Modal */}
       <CreateEditCommitteeModal
         isOpen={isModalOpen}
         onClose={() => {
-          console.log('Modal close called'); // Debug log
           setIsModalOpen(false);
         }}
         onSave={handleSaveCommittee}
         committee={selectedCommittee}
         mode={modalMode}
       />
-      
-      {/* Debug info */}
-      <div className="fixed bottom-4 right-4 bg-gray-800 text-white p-2 rounded text-xs">
-        Modal Open: {isModalOpen.toString()}
-      </div>
-    </div>
+    </Box>
   );
 };
 

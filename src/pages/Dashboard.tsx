@@ -1,81 +1,69 @@
 import React from 'react';
-import { Card, CardHeader, CardBody } from '@nextui-org/react';
+import { Box, Stack, Heading, Text, SimpleGrid } from '@chakra-ui/react';
 import { useAuth } from '../hooks/useAuth';
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
 
   return (
-    <div className="space-y-4 sm:space-y-6">
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+    <Stack gap={{ base: 4, sm: 6 }}>
+      <Box>
+        <Heading size={{ base: 'lg', sm: 'xl' }} color="white" mb={2}>
           Welcome back, {user?.username || 'User'}!
-        </h1>
-        <p className="text-sm sm:text-base text-gray-400">
+        </Heading>
+        <Text color="gray.400" fontSize={{ base: 'sm', sm: 'md' }}>
           Committee Management Dashboard
-        </p>
-      </div>
+        </Text>
+      </Box>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-        <Card className="bg-gray-900/50 border border-gray-800">
-          <CardHeader className="pb-2 sm:pb-3">
-            <h3 className="text-base sm:text-lg font-semibold text-white">Total Committees</h3>
-          </CardHeader>
-          <CardBody className="pt-0">
-            <p className="text-2xl sm:text-3xl font-bold text-red-500">12</p>
-            <p className="text-gray-400 text-xs sm:text-sm">Active committees</p>
-          </CardBody>
-        </Card>
+      <SimpleGrid columns={{ base: 1, sm: 2, lg: 3 }} gap={{ base: 4, sm: 6 }}>
+        <Box bg="gray.900" borderColor="gray.800" borderWidth="1px" rounded="lg" p={{ base: 4, sm: 5 }}>
+          <Text color="white" fontWeight="semibold" fontSize={{ base: 'md', sm: 'lg' }} mb={2}>Total Committees</Text>
+          <Text color="red.500" fontWeight="bold" fontSize={{ base: '2xl', sm: '3xl' }}>12</Text>
+          <Text color="gray.400" fontSize={{ base: 'xs', sm: 'sm' }}>Active committees</Text>
+        </Box>
 
-        <Card className="bg-gray-900/50 border border-gray-800">
-          <CardHeader className="pb-2 sm:pb-3">
-            <h3 className="text-base sm:text-lg font-semibold text-white">Total Members</h3>
-          </CardHeader>
-          <CardBody className="pt-0">
-            <p className="text-2xl sm:text-3xl font-bold text-blue-500">248</p>
-            <p className="text-gray-400 text-xs sm:text-sm">Registered members</p>
-          </CardBody>
-        </Card>
+        <Box bg="gray.900" borderColor="gray.800" borderWidth="1px" rounded="lg" p={{ base: 4, sm: 5 }}>
+          <Text color="white" fontWeight="semibold" fontSize={{ base: 'md', sm: 'lg' }} mb={2}>Total Members</Text>
+          <Text color="blue.400" fontWeight="bold" fontSize={{ base: '2xl', sm: '3xl' }}>248</Text>
+          <Text color="gray.400" fontSize={{ base: 'xs', sm: 'sm' }}>Registered members</Text>
+        </Box>
 
-        <Card className="bg-gray-900/50 border border-gray-800 sm:col-span-2 lg:col-span-1">
-          <CardHeader className="pb-2 sm:pb-3">
-            <h3 className="text-base sm:text-lg font-semibold text-white">Pending Bids</h3>
-          </CardHeader>
-          <CardBody className="pt-0">
-            <p className="text-2xl sm:text-3xl font-bold text-yellow-500">7</p>
-            <p className="text-gray-400 text-xs sm:text-sm">Awaiting approval</p>
-          </CardBody>
-        </Card>
-      </div>
+        <Box bg="gray.900" borderColor="gray.800" borderWidth="1px" rounded="lg" p={{ base: 4, sm: 5 }} gridColumn={{ base: 'auto', sm: 'span 2', lg: 'auto' }}>
+          <Text color="white" fontWeight="semibold" fontSize={{ base: 'md', sm: 'lg' }} mb={2}>Pending Bids</Text>
+          <Text color="yellow.400" fontWeight="bold" fontSize={{ base: '2xl', sm: '3xl' }}>7</Text>
+          <Text color="gray.400" fontSize={{ base: 'xs', sm: 'sm' }}>Awaiting approval</Text>
+        </Box>
+      </SimpleGrid>
 
-      <Card className="bg-gray-900/50 border border-gray-800">
-        <CardHeader>
-          <h3 className="text-lg sm:text-xl font-semibold text-white">Recent Activity</h3>
-        </CardHeader>
-        <CardBody>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg">
-              <div>
-                <p className="text-white text-sm sm:text-base">New member joined: John Doe</p>
-                <p className="text-gray-400 text-xs sm:text-sm">2 hours ago</p>
-              </div>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg">
-              <div>
-                <p className="text-white text-sm sm:text-base">Bid submitted for Project Alpha</p>
-                <p className="text-gray-400 text-xs sm:text-sm">5 hours ago</p>
-              </div>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg">
-              <div>
-                <p className="text-white text-sm sm:text-base">Committee meeting scheduled</p>
-                <p className="text-gray-400 text-xs sm:text-sm">1 day ago</p>
-              </div>
-            </div>
-          </div>
-        </CardBody>
-      </Card>
-    </div>
+      <Box bg="gray.900" borderColor="gray.800" borderWidth="1px" rounded="lg">
+        <Box px={{ base: 4, sm: 5 }} py={{ base: 3, sm: 4 }} borderBottomWidth="1px" borderColor="gray.800">
+          <Text color="white" fontWeight="semibold" fontSize={{ base: 'lg', sm: 'xl' }}>Recent Activity</Text>
+        </Box>
+        <Box px={{ base: 4, sm: 5 }} py={{ base: 3, sm: 4 }}>
+          <Stack gap={3}>
+            <Box display="flex" alignItems="center" justifyContent="space-between" p={3} bg="gray.800" rounded="md">
+              <Box>
+                <Text color="white" fontSize={{ base: 'sm', sm: 'md' }}>New member joined: John Doe</Text>
+                <Text color="gray.400" fontSize={{ base: 'xs', sm: 'sm' }}>2 hours ago</Text>
+              </Box>
+            </Box>
+            <Box display="flex" alignItems="center" justifyContent="space-between" p={3} bg="gray.800" rounded="md">
+              <Box>
+                <Text color="white" fontSize={{ base: 'sm', sm: 'md' }}>Bid submitted for Project Alpha</Text>
+                <Text color="gray.400" fontSize={{ base: 'xs', sm: 'sm' }}>5 hours ago</Text>
+              </Box>
+            </Box>
+            <Box display="flex" alignItems="center" justifyContent="space-between" p={3} bg="gray.800" rounded="md">
+              <Box>
+                <Text color="white" fontSize={{ base: 'sm', sm: 'md' }}>Committee meeting scheduled</Text>
+                <Text color="gray.400" fontSize={{ base: 'xs', sm: 'sm' }}>1 day ago</Text>
+              </Box>
+            </Box>
+          </Stack>
+        </Box>
+      </Box>
+    </Stack>
   );
 };
 

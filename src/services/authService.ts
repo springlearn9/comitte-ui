@@ -1,92 +1,158 @@
 import axios from 'axios';
 import type { User } from '../contexts/AuthContext';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
-
-export interface LoginResponse {
-  token: string;
-  user: User;
-}
-
+// API Request/Response interfaces matching backend DTOs
 export interface LoginRequest {
-  username: string;
+  usernameOrEmail: string;
   password: string;
 }
 
+export interface RegisterRequest {
+  username: string;
+  email: string;
+  password: string;
+  mobile?: string;
+}
+
+export interface PasswordResetRequest {
+  usernameOrEmail: string;
+}
+
+export interface PasswordUpdateRequest {
+  token: string;
+  usernameOrEmail: string;
+  otp: string;
+  newPassword: string;
+}
+
+export interface LoginResponse {
+  accessToken: string;
+  tokenType: string;
+  expiresIn: number;
+  user: any;
+}
+
+export interface MemberResponse {
+  id: string;
+  username: string;
+  email: string;
+  mobile?: string;
+  createdAt: string;
+}
+
 class AuthService {
+  private tokenKey = 'auth_token';
+  private userKey = 'auth_user';
   private apiClient = axios.create({
-    baseURL: API_BASE_URL,
+    baseURL: '/api',
     headers: {
-      'Content-Type': 'application/json',
-    },
+      'Content-Type': 'application/json'
+    }
   });
 
   constructor() {
-    // Add request interceptor to include auth token
+    // Add request interceptor to include token
     this.apiClient.interceptors.request.use((config) => {
-      const token = localStorage.getItem('token');
+      const token = this.getToken();
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
       return config;
     });
 
-    // Add response interceptor to handle auth errors
+    // Add response interceptor for error handling
     this.apiClient.interceptors.response.use(
       (response) => response,
       (error) => {
         if (error.response?.status === 401) {
-          localStorage.removeItem('token');
-          window.location.href = '/login';
+          this.logout();
+          window.location.href = '/auth/signin';
         }
         return Promise.reject(error);
       }
     );
   }
 
-  async login(username: string, password: string): Promise<LoginResponse> {
+  async login(usernameOrEmail: string, password: string): Promise<LoginResponse> {
     try {
-      const response = await this.apiClient.post<LoginResponse>('/api/auth/login', {
-        username,
-        password,
-      });
+      const loginRequest: LoginRequest = {
+        usernameOrEmail,
+        password
+      };
+      
+      const response = await this.apiClient.post<LoginResponse>('/auth/login', loginRequest);
+      const { accessToken, user } = response.data;
+      
+      localStorage.setItem(this.tokenKey, accessToken);
+      localStorage.setItem(this.userKey, JSON.stringify(user));
+      
       return response.data;
-    } catch (error) {
-      console.error('Login error:', error);
-      throw new Error('Login failed');
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || 'Invalid credentials';
+      throw new Error(errorMessage);
     }
   }
 
-  async verifyToken(token: string): Promise<User> {
+  async register(userData: RegisterRequest): Promise<MemberResponse> {
     try {
-      const response = await this.apiClient.get<User>('/api/auth/me', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await this.apiClient.post<MemberResponse>('/auth/register', userData);
       return response.data;
-    } catch (error) {
-      console.error('Token verification error:', error);
-      throw new Error('Token verification failed');
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || 'Registration failed';
+      throw new Error(errorMessage);
+    }
+  }
+
+  async requestPasswordReset(usernameOrEmail: string): Promise<string> {
+    try {
+      const request: PasswordResetRequest = { usernameOrEmail };
+      const response = await this.apiClient.post('/password/request-reset', request);
+      return response.data;
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || 'Password reset request failed';
+      throw new Error(errorMessage);
+    }
+  }
+
+  async resetPassword(token: string, usernameOrEmail: string, otp: string, newPassword: string): Promise<string> {
+    try {
+      const request: PasswordUpdateRequest = {
+        token,
+        usernameOrEmail,
+        otp,
+        newPassword
+      };
+      const response = await this.apiClient.post('/password/reset', request);
+      return response.data;
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || 'Password reset failed';
+      throw new Error(errorMessage);
     }
   }
 
   async logout(): Promise<void> {
-    try {
-      await this.apiClient.post('/api/auth/logout');
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
+    localStorage.removeItem(this.tokenKey);
+    localStorage.removeItem(this.userKey);
   }
 
-  async refreshToken(): Promise<string> {
-    try {
-      const response = await this.apiClient.post<{ token: string }>('/api/auth/refresh');
-      return response.data.token;
-    } catch (error) {
-      console.error('Token refresh error:', error);
-      throw new Error('Token refresh failed');
+  async getCurrentUser(): Promise<User | null> {
+    const userStr = localStorage.getItem(this.userKey);
+    if (userStr) {
+      try {
+        return JSON.parse(userStr);
+      } catch {
+        return null;
+      }
     }
+    return null;
+  }
+
+  getToken(): string | null {
+    return localStorage.getItem(this.tokenKey);
+  }
+
+  isAuthenticated(): boolean {
+    return !!this.getToken();
   }
 }
 

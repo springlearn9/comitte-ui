@@ -15,6 +15,7 @@ export interface Committee {
   createdAt?: string;
   budget?: string;
   avatar?: string;
+  paymentDateDays?: string; // for backend mapping
 }
 
 export interface CommitteeListItem {
@@ -28,3 +29,53 @@ export interface CommitteeListItem {
   location?: string;
   avatar?: string;
 }
+
+// Backend DTOs (Spring Boot)
+export interface ComitteRequestDTO {
+  ownerId: number;            // required
+  comitteName: string;        // required
+  startDate?: string;         // ISO date (LocalDate)
+  fullAmount?: number;
+  membersCount?: number;
+  fullShare?: number;
+  dueDateDays?: number;
+  paymentDateDays?: number;
+}
+
+export interface ComitteResponseDTO {
+  comitteId: number;
+  ownerId: number;
+  ownerName?: string;
+  comitteName: string;
+  startDate?: string; // ISO date
+  fullAmount?: number;
+  membersCount?: number;
+  fullShare?: number;
+  dueDateDays?: number;
+  paymentDateDays?: number;
+  createdTimestamp?: string;
+  updatedTimestamp?: string;
+}
+
+// Mappers between UI model and backend DTOs
+export const mapResponseToListItem = (r: ComitteResponseDTO): CommitteeListItem => ({
+  id: String(r.comitteId),
+  name: r.comitteName,
+  owner: (r.ownerName && r.ownerName.trim().length > 0) ? r.ownerName : String(r.ownerId),
+  members: r.membersCount ?? 0,
+  description: '',
+  createdAt: r.startDate ?? '',
+  budget: r.fullAmount != null ? `₹${r.fullAmount}` : '₹0',
+  location: undefined,
+});
+
+export const mapModalToRequest = (c: Committee, ownerId: number): ComitteRequestDTO => ({
+  ownerId,
+  comitteName: c.name,
+  startDate: c.startDate || undefined,
+  fullAmount: c.totalAmount ? Number(c.totalAmount) : undefined,
+  membersCount: c.maxMembers || undefined,
+  fullShare: c.monthlyAmount ? Number(c.monthlyAmount) : undefined,
+  dueDateDays: c.duration ? Number(c.duration) : undefined,
+  paymentDateDays: c.paymentDateDays ? Number(c.paymentDateDays) : undefined,
+});

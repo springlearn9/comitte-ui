@@ -29,15 +29,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   useEffect(() => {
     const initAuth = async () => {
-      const token = localStorage.getItem('token');
-      if (token) {
-        try {
-          const userData = await authService.verifyToken(token);
+      try {
+        const userData = await authService.getCurrentUser();
+        if (userData && authService.isAuthenticated()) {
           setUser(userData);
-        } catch (error) {
-          console.error('Token verification failed:', error);
-          localStorage.removeItem('token');
         }
+      } catch (error) {
+        console.error('Auth initialization failed:', error);
+        authService.logout();
       }
       setLoading(false);
     };
@@ -48,26 +47,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (username: string, password: string): Promise<boolean> => {
     try {
       setLoading(true);
-      
-      // Mock authentication for development
-      if (username && password) {
-        const mockUser: User = {
-          id: 1,
-          username: username,
-          email: `${username}@committee.com`,
-          roles: ['USER']
-        };
-        
-        const mockToken = 'mock-jwt-token-' + Date.now();
-        localStorage.setItem('token', mockToken);
-        setUser(mockUser);
-        return true;
-      }
-      
-      return false;
+      const response = await authService.login(username, password);
+      setUser(response.user);
+      return true;
     } catch (error) {
       console.error('Login failed:', error);
-      return false;
+      throw error;
     } finally {
       setLoading(false);
     }
