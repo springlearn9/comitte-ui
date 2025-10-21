@@ -26,6 +26,9 @@ export interface CommitteeListItem {
   description: string;
   createdAt: string;
   budget: string;
+  monthlyShare?: number;
+  bidsCount?: number;
+  bidsRatio?: string;
   location?: string;
   avatar?: string;
 }
@@ -47,12 +50,15 @@ export interface ComitteResponseDTO {
   ownerId: number;
   ownerName?: string;
   comitteName: string;
+  calculatedComitteName?: string;
   startDate?: string; // ISO date
   fullAmount?: number;
   membersCount?: number;
   fullShare?: number;
   dueDateDays?: number;
   paymentDateDays?: number;
+  bidsCount?: number;
+  bidsRatio?: string | number;
   createdTimestamp?: string;
   updatedTimestamp?: string;
 }
@@ -60,12 +66,15 @@ export interface ComitteResponseDTO {
 // Mappers between UI model and backend DTOs
 export const mapResponseToListItem = (r: ComitteResponseDTO): CommitteeListItem => ({
   id: String(r.comitteId),
-  name: r.comitteName,
+  name: r.calculatedComitteName ?? r.comitteName,
   owner: (r.ownerName && r.ownerName.trim().length > 0) ? r.ownerName : String(r.ownerId),
   members: r.membersCount ?? 0,
   description: '',
   createdAt: r.startDate ?? '',
   budget: r.fullAmount != null ? `₹${r.fullAmount}` : '₹0',
+  monthlyShare: r.fullShare ?? undefined,
+  bidsCount: r.bidsCount ?? undefined,
+  bidsRatio: r.bidsRatio != null ? String(r.bidsRatio) : undefined,
   location: undefined,
 });
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Stack, Text, Button, SimpleGrid } from '@chakra-ui/react';
-import { Plus, Users, Calendar, MapPin, Edit, Trash2 } from 'lucide-react';
+import { Box, Stack, Text, Button } from '@chakra-ui/react';
+import { Plus, Edit, Trash2 } from 'lucide-react';
 import CreateEditCommitteeModal from './CreateEditCommitteeModal';
 import type { CommitteeListItem, Committee } from '../../types/committee';
 import { committeeService } from '../../services/committeeService';
@@ -9,66 +9,67 @@ import { useAuth } from '../../hooks/useAuth';
 import { memberService } from '../../services/memberService';
 
 
-const CommitteeCard: React.FC<{ committee: CommitteeListItem; showOwner?: boolean; canManage?: boolean; onEdit?: (committee: CommitteeListItem) => void; onDelete?: (id: string) => void }> = ({ 
-  committee, 
-  showOwner = false,
-  canManage = false,
-  onEdit,
-  onDelete
-}) => (
-  <Box bg="gray.900" borderColor="gray.800" borderWidth="1px" rounded="lg" p={4} _hover={{ bg: 'gray.800' }}>
-    <Box display="flex" alignItems="center" justifyContent="space-between" mb={3}>
-      <Box display="flex" alignItems="center" gap={3}>
-        {showOwner && (
-          <Box>
-            <Text fontSize="sm" fontWeight="medium" color="white">{committee.owner}</Text>
-            <Box as="span" fontSize="xs" color="gray.300" bg="gray.700" px={2} py={0.5} rounded="full">
-              {committee.members} members
+// Helpers
+const formatDate = (iso?: string) => {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return iso;
+  const dd = String(d.getDate()).padStart(2, '0');
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const mm = months[d.getMonth()];
+  const yy = String(d.getFullYear()).slice(-2);
+  return `${dd}${mm}${yy}`;
+};
+
+const formatCurrency = (value?: number | string) => {
+  if (value == null) return '';
+  if (typeof value === 'string') return value; // already formatted like '₹200000'
+  try {
+    return `₹${value}`;
+  } catch {
+    return `₹${value}`;
+  }
+};
+
+const CommitteeRow: React.FC<{ committee: CommitteeListItem; canManage?: boolean; onEdit?: (committee: CommitteeListItem) => void; onDelete?: (id: string) => void; }>=({ committee, canManage=false, onEdit, onDelete }) => {
+  const rightAmount = committee.monthlyShare != null ? formatCurrency(committee.monthlyShare) : committee.budget;
+  const rightDate = formatDate(committee.createdAt);
+  const bidsRatio = committee.bidsRatio;
+  return (
+    <Box bg="gray.900" borderColor="gray.800" borderWidth="1px" rounded="lg" p={3} _hover={{ bg: 'gray.800' }}>
+      <Box display="flex" alignItems="center" justifyContent="space-between" gap={3}>
+        {/* Left: condensed calculated name */}
+        <Text color="white" fontWeight="medium" lineClamp={1}>
+          {committee.name}
+        </Text>
+        {/* Right: bidsRatio • date • amount */}
+        <Box display="flex" alignItems="center" gap={4}>
+          {bidsRatio && (
+            <>
+              <Box bg="gray.700" color="gray.100" px={2} py={0.5} rounded="full" fontSize="xs" minW={6} textAlign="center">
+                {bidsRatio}
+              </Box>
+              <Text color="gray.500">•</Text>
+            </>
+          )}
+          <Text color="gray.400" fontSize="sm">{rightDate}</Text>
+          <Text color="gray.500">•</Text>
+          <Text color="white" fontWeight="semibold">{rightAmount}</Text>
+          {canManage && (
+            <Box display="inline-flex" gap={2} ml={2}>
+              <Box as="button" onClick={() => onEdit?.(committee)} title="Edit" p={1} _hover={{ bg: 'gray.700', color: 'blue.300' }} rounded="md" color="blue.400">
+                <Edit size={16} />
+              </Box>
+              <Box as="button" onClick={() => committee.id && onDelete?.(committee.id)} title="Delete" p={1} _hover={{ bg: 'gray.700', color: 'red.300' }} rounded="md" color="red.400">
+                <Trash2 size={16} />
+              </Box>
             </Box>
-          </Box>
-        )}
-      </Box>
-      <Box display="flex" alignItems="center" gap={2}>
-        <Box textAlign="right">
-          <Text fontSize="lg" fontWeight="bold" color="white">{committee.budget}</Text>
-          <Text fontSize="xs" color="gray.400">{committee.createdAt}</Text>
+          )}
         </Box>
-        {canManage && (
-          <Stack direction="column" gap={1} ml={2}>
-            <Box as="button" onClick={() => onEdit?.(committee)} title="Edit Committee" p={1.5} _hover={{ bg: 'gray.700', color: 'blue.300' }} rounded="md" color="blue.400">
-              <Edit size={16} />
-            </Box>
-            <Box as="button" onClick={() => committee.id && onDelete?.(committee.id)} title="Delete Committee" p={1.5} _hover={{ bg: 'gray.700', color: 'red.300' }} rounded="md" color="red.400">
-              <Trash2 size={16} />
-            </Box>
-          </Stack>
-        )}
       </Box>
     </Box>
-
-    <Text color="white" fontWeight="medium" mb={2}>{committee.name}</Text>
-    <Text color="gray.400" fontSize="sm" mb={3}>{committee.description}</Text>
-
-    <Box display="flex" alignItems="center" justifyContent="space-between" fontSize="sm" color="gray.400">
-      <Box display="flex" alignItems="center" gap={4}>
-        <Box display="flex" alignItems="center" gap={1}>
-          <Users size={16} />
-          <Text>{committee.members}</Text>
-        </Box>
-        <Box display="flex" alignItems="center" gap={1}>
-          <Calendar size={16} />
-          <Text>{committee.createdAt}</Text>
-        </Box>
-        {committee.location && (
-          <Box display="flex" alignItems="center" gap={1}>
-            <MapPin size={16} />
-            <Text>{committee.location}</Text>
-          </Box>
-        )}
-      </Box>
-    </Box>
-  </Box>
-);
+  );
+};
 
 const CommitteeGroup: React.FC<{ 
   owner: string; 
@@ -93,7 +94,6 @@ const CommitteeGroup: React.FC<{
     >
       <Box flex="1">
         <Text color="white" fontWeight="medium">{owner}</Text>
-        <Text color="gray.400" fontSize="sm">{committees.length} committees</Text>
       </Box>
       <Box as="span" bg="gray.700" color="gray.200" px={2} py={0.5} rounded="full" fontSize="xs">
         {committees.length}
@@ -103,9 +103,9 @@ const CommitteeGroup: React.FC<{
     {isExpanded && (
       <Stack gap={3} ml={4}>
         {committees.map((committee) => (
-          <CommitteeCard 
-            key={committee.id} 
-            committee={committee} 
+          <CommitteeRow
+            key={committee.id}
+            committee={committee}
             onEdit={onEdit}
             onDelete={onDelete}
           />
@@ -353,18 +353,17 @@ const Committees: React.FC = () => {
             <Text color="gray.500">You don't own any committees yet. Use the "Add Committee" button to create one.</Text>
           )}
 
-          <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap={4}>
+          <Stack gap={3}>
             {myOwnedCommittees.map((committee) => (
-              <CommitteeCard 
-                key={committee.id} 
-                committee={committee} 
-                showOwner={false} 
+              <CommitteeRow
+                key={committee.id}
+                committee={committee}
                 canManage
                 onEdit={handleEditCommittee}
                 onDelete={handleDeleteCommittee}
               />
             ))}
-          </SimpleGrid>
+          </Stack>
         </Box>
       )}
 
