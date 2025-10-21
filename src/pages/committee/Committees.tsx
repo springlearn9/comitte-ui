@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Stack, Text, Button } from '@chakra-ui/react';
+import { Box, Stack, Text, Button, Tabs } from '@chakra-ui/react';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 import CreateEditCommitteeModal from './CreateEditCommitteeModal';
 import type { CommitteeListItem, Committee } from '../../types/committee';
@@ -290,46 +290,84 @@ const Committees: React.FC = () => {
           <Text as="h1" fontSize="2xl" fontWeight="bold" color="white" mb={2}>Committees</Text>
           <Text color="gray.400">Manage and view all committees</Text>
         </Box>
-        <Button colorPalette="red" onClick={handleCreateCommittee}>
-          <Box mr={2} display="inline-flex"><Plus size={16} /></Box>
-          Add Committee
-        </Button>
+        {activeTab === 'owned-committees' && (
+          <Button colorPalette="red" onClick={handleCreateCommittee}>
+            <Box mr={2} display="inline-flex"><Plus size={16} /></Box>
+            Add Committee
+          </Button>
+        )}
       </Box>
 
-      {/* Custom Tab Navigation */}
-      <Stack direction="row" gap={2} mb={6}>
-        <Button
-          variant={activeTab === 'my-committees' ? 'solid' : 'outline'}
-          colorPalette="red"
-          onClick={() => setActiveTab('my-committees')}
+      {/* Tabs */}
+      <Tabs.Root
+        value={activeTab}
+        onValueChange={(details: { value: string }) =>
+          setActiveTab(details.value === 'my-committees' ? 'my-committees' : 'owned-committees')
+        }
+      >
+        <Tabs.List
+          mb={4}
+          borderBottomWidth="0"
+          gap={6}
+          position="relative"
         >
-          My Committees
-        </Button>
-        <Button
-          variant={activeTab === 'owned-committees' ? 'solid' : 'outline'}
-          colorPalette="red"
-          onClick={() => setActiveTab('owned-committees')}
-        >
-          Owned Committees
-        </Button>
-      </Stack>
+          <Tabs.Trigger
+            value="my-committees"
+            px={3}
+            py={2}
+            roundedTop="md"
+            bg="transparent"
+            fontWeight="semibold"
+            color="gray.400"
+            borderWidth="1px"
+            borderColor="transparent"
+            borderBottomColor="transparent"
+            _hover={{ color: 'gray.300' }}
+            css={{
+              '&[data-selected]': {
+                color: 'white',
+                borderColor: 'var(--chakra-colors-gray-700)',
+                borderBottomColor: 'transparent',
+              },
+            }}
+          >
+            My Committees
+          </Tabs.Trigger>
+          <Tabs.Trigger
+            value="owned-committees"
+            px={3}
+            py={2}
+            roundedTop="md"
+            bg="transparent"
+            fontWeight="semibold"
+            color="gray.400"
+            borderWidth="1px"
+            borderColor="transparent"
+            borderBottomColor="transparent"
+            _hover={{ color: 'gray.300' }}
+            css={{
+              '&[data-selected]': {
+                color: 'white',
+                borderColor: 'var(--chakra-colors-gray-700)',
+                borderBottomColor: 'transparent',
+              },
+            }}
+          >
+            Owned Committees
+          </Tabs.Trigger>
+          {/* No indicator; active tab overlaps bottom border for enclosed style */}
+        </Tabs.List>
 
-      {/* Tab Content */}
-      {loading && (
-        <Text color="gray.400">Loading committees...</Text>
-      )}
-      {error && (
-        <Text color="red.400">{error}</Text>
-      )}
-      {activeTab === 'my-committees' && (
-        <Box>
+        {loading && <Text color="gray.400">Loading committees...</Text>}
+        {error && <Text color="red.400">{error}</Text>}
+
+        <Tabs.Content value="my-committees" paddingX={0}>
           <Text color="gray.400" mb={4}>
             Committees you are part of, grouped by owner ({Object.keys(groupedCommittees).length} owners)
           </Text>
           {Object.keys(groupedCommittees).length === 0 && !loading && !error && (
             <Text color="gray.500">You're not part of any committees yet.</Text>
           )}
-
           {Object.entries(groupedCommittees).map(([owner, committees]) => (
             <CommitteeGroup
               key={owner}
@@ -341,18 +379,15 @@ const Committees: React.FC = () => {
               onDelete={handleDeleteCommittee}
             />
           ))}
-        </Box>
-      )}
+        </Tabs.Content>
 
-      {activeTab === 'owned-committees' && (
-        <Box>
+        <Tabs.Content value="owned-committees" paddingX={0}>
           <Text color="gray.400" mb={4}>
             Committees you own ({myOwnedCommittees.length} committees)
           </Text>
           {myOwnedCommittees.length === 0 && !loading && !error && (
             <Text color="gray.500">You don't own any committees yet. Use the "Add Committee" button to create one.</Text>
           )}
-
           <Stack gap={3}>
             {myOwnedCommittees.map((committee) => (
               <CommitteeRow
@@ -364,8 +399,8 @@ const Committees: React.FC = () => {
               />
             ))}
           </Stack>
-        </Box>
-      )}
+        </Tabs.Content>
+      </Tabs.Root>
 
       {/* Create/Edit Committee Modal */}
       <CreateEditCommitteeModal

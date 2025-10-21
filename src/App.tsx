@@ -4,6 +4,7 @@ import { NextUIProvider } from '@nextui-org/react';
 import { AuthProvider } from './contexts/AuthContext';
 import { useAuth } from './hooks/useAuth';
 import Dashboard from './pages/Dashboard';
+import Bids from './pages/bids/Bids';
 import { Committees } from './pages/committee';
 import { SignIn, SignUp, ForgotPassword, UserRegistration } from './pages/auth';
 import Sidebar from './components/layout/Sidebar';
@@ -69,6 +70,14 @@ const AppContent: React.FC = () => {
         element={
           <ProtectedRoute>
             <Committees />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/bids"
+        element={
+          <ProtectedRoute>
+            <Bids />
           </ProtectedRoute>
         }
       />
