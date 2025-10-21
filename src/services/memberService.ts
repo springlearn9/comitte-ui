@@ -24,6 +24,12 @@ class MemberService {
     const { data } = await this.api.get<MemberResponse[]>(`/members/search?${searchParams.toString()}`);
     return data;
   }
+
+  // GET /api/comittes/{id}/members
+  async getByCommittee(comitteId: number): Promise<MemberResponse[]> {
+    const { data } = await this.api.get<MemberResponse[]>(`/comittes/${comitteId}/members`);
+    return data;
+  }
 }
 
 export const memberService = new MemberService();

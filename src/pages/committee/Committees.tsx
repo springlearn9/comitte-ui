@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Stack, Text, Button, Tabs } from '@chakra-ui/react';
+import { Box, Stack, Text, Button, Tabs, DialogRoot, DialogBackdrop, DialogPositioner, DialogContent, DialogHeader, DialogBody, DialogFooter, DialogTitle } from '@chakra-ui/react';
 import { Plus, Edit, Trash2, ChevronRight } from 'lucide-react';
 import CreateEditCommitteeModal from './CreateEditCommitteeModal';
 import type { CommitteeListItem, Committee } from '../../types/committee';
@@ -7,6 +7,9 @@ import { committeeService } from '../../services/committeeService';
 import { mapResponseToListItem, mapModalToRequest } from '../../types/committee';
 import { useAuth } from '../../hooks/useAuth';
 import { memberService } from '../../services/memberService';
+import { bidService } from '../../services/bidService';
+import { mapBidResponse, type Bid } from '../../types/bid';
+import type { MemberResponse } from '../../services/authService';
 
 
 // Helpers
@@ -31,7 +34,7 @@ const formatCurrency = (value?: number | string) => {
   }
 };
 
-const CommitteeRow: React.FC<{ committee: CommitteeListItem; canManage?: boolean; onEdit?: (committee: CommitteeListItem) => void; onDelete?: (id: string) => void; }>=({ committee, canManage=false, onEdit, onDelete }) => {
+const CommitteeRow: React.FC<{ committee: CommitteeListItem; canManage?: boolean; onEdit?: (committee: CommitteeListItem) => void; onDelete?: (id: string) => void; onShowMembers?: (committee: CommitteeListItem) => void; onShowBids?: (committee: CommitteeListItem) => void; }>=({ committee, canManage=false, onEdit, onDelete, onShowMembers, onShowBids }) => {
   const rightAmount = committee.monthlyShare != null ? formatCurrency(committee.monthlyShare) : committee.budget;
   const rightDate = formatDate(committee.createdAt);
   const bidsRatio = committee.bidsRatio;
@@ -55,6 +58,16 @@ const CommitteeRow: React.FC<{ committee: CommitteeListItem; canManage?: boolean
           <Text color="gray.400" fontSize="sm">{rightDate}</Text>
           <Text color="gray.500">•</Text>
           <Text color="white" fontWeight="semibold">{rightAmount}</Text>
+          <Text color="gray.500">•</Text>
+          <Box as="button" onClick={() => onShowMembers?.(committee)}
+               color="blue.300" _hover={{ color: 'blue.200' }} fontSize="sm">
+            Members
+          </Box>
+          <Text color="gray.500">•</Text>
+          <Box as="button" onClick={() => onShowBids?.(committee)}
+               color="blue.300" _hover={{ color: 'blue.200' }} fontSize="sm">
+            Bids
+          </Box>
           {canManage && (
             <Box display="inline-flex" gap={2} ml={2}>
               <Box as="button" onClick={() => onEdit?.(committee)} title="Edit" p={1} _hover={{ bg: 'gray.700', color: 'blue.300' }} rounded="md" color="blue.400">
@@ -78,7 +91,9 @@ const CommitteeGroup: React.FC<{
   onToggle: () => void;
   onEdit: (committee: CommitteeListItem) => void;
   onDelete: (id: string) => void;
-}> = ({ owner, committees, isExpanded, onToggle, onEdit, onDelete }) => (
+  onShowMembers: (committee: CommitteeListItem) => void;
+  onShowBids: (committee: CommitteeListItem) => void;
+}> = ({ owner, committees, isExpanded, onToggle, onEdit, onDelete, onShowMembers, onShowBids }) => (
   <Box mb={6} bg="gray.900" borderColor="gray.800" borderWidth="1px" rounded="lg" p={2}>
     <Box
       display="flex"
@@ -110,6 +125,8 @@ const CommitteeGroup: React.FC<{
             committee={committee}
             onEdit={onEdit}
             onDelete={onDelete}
+            onShowMembers={onShowMembers}
+            onShowBids={onShowBids}
           />
         ))}
       </Stack>
@@ -129,6 +146,10 @@ const Committees: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
   const [effectiveMemberId, setEffectiveMemberId] = useState<number>(0);
+
+  // Popups state
+  const [membersModal, setMembersModal] = useState<{ open: boolean; title: string; loading: boolean; items: MemberResponse[] }>({ open: false, title: '', loading: false, items: []});
+  const [bidsModal, setBidsModal] = useState<{ open: boolean; title: string; loading: boolean; items: Bid[] }>({ open: false, title: '', loading: false, items: []});
 
   // Resolve the memberId/ownerId used by backend; prefer 'memberId' from user, then search by username, then user.id
   useEffect(() => {
@@ -254,6 +275,26 @@ const Committees: React.FC = () => {
     setIsModalOpen(true);
   };
 
+  const openMembers = async (committee: CommitteeListItem) => {
+    setMembersModal({ open: true, title: `${committee.name} • Members`, loading: true, items: [] });
+    try {
+      const data = await memberService.getByCommittee(Number(committee.id));
+      setMembersModal({ open: true, title: `${committee.name} • Members`, loading: false, items: data });
+    } catch (e) {
+      setMembersModal({ open: true, title: `${committee.name} • Members`, loading: false, items: [] });
+    }
+  };
+
+  const openBids = async (committee: CommitteeListItem) => {
+    setBidsModal({ open: true, title: `${committee.name} • Bids`, loading: true, items: [] });
+    try {
+      const data = await bidService.getByCommittee(Number(committee.id));
+      setBidsModal({ open: true, title: `${committee.name} • Bids`, loading: false, items: data.map(mapBidResponse) });
+    } catch (e) {
+      setBidsModal({ open: true, title: `${committee.name} • Bids`, loading: false, items: [] });
+    }
+  };
+
   const handleDeleteCommittee = (id: string) => {
     if (window.confirm('Are you sure you want to delete this committee?')) {
       committeeService.delete(Number(id))
@@ -374,6 +415,8 @@ const Committees: React.FC = () => {
               onToggle={() => toggleGroup(owner)}
               onEdit={handleEditCommittee}
               onDelete={handleDeleteCommittee}
+              onShowMembers={openMembers}
+              onShowBids={openBids}
             />
           ))}
         </Tabs.Content>
@@ -399,6 +442,8 @@ const Committees: React.FC = () => {
                 canManage
                 onEdit={handleEditCommittee}
                 onDelete={handleDeleteCommittee}
+                onShowMembers={openMembers}
+                onShowBids={openBids}
               />
             ))}
           </Stack>
@@ -415,6 +460,69 @@ const Committees: React.FC = () => {
         committee={selectedCommittee}
         mode={modalMode}
       />
+
+      {/* Members Modal */}
+      <DialogRoot open={membersModal.open} onOpenChange={(d) => !d.open && setMembersModal(prev => ({ ...prev, open: false }))}>
+        <DialogBackdrop bg="blackAlpha.700" backdropFilter="auto" backdropBlur="2px" />
+        <DialogPositioner inset="0" display="flex" alignItems="center" justifyContent="center" p={{ base: 4, sm: 6 }}>
+          <DialogContent bg="gray.900" color="white" maxW="lg" maxH="80dvh" overflowY="auto" borderColor="gray.700" borderWidth="1px" rounded="md">
+            <DialogHeader>
+              <DialogTitle><Text fontWeight="bold">{membersModal.title}</Text></DialogTitle>
+            </DialogHeader>
+            <DialogBody>
+              {membersModal.loading && <Text color="gray.400">Loading members…</Text>}
+              {!membersModal.loading && membersModal.items.length === 0 && (
+                <Text color="gray.500" fontSize="sm">No members found.</Text>
+              )}
+              <Stack gap={2}>
+                {membersModal.items.map((m) => (
+                  <Box key={m.id} bg="gray.800" rounded="md" px={3} py={2} display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
+                    <Text color="white" fontSize="sm">{m.username}</Text>
+                    <Text color="gray.400" fontSize="sm" textAlign="right">{m.mobile || m.email}</Text>
+                  </Box>
+                ))}
+              </Stack>
+            </DialogBody>
+            <DialogFooter>
+              <Button onClick={() => setMembersModal(prev => ({ ...prev, open: false }))}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </DialogPositioner>
+      </DialogRoot>
+
+      {/* Bids Modal */}
+      <DialogRoot open={bidsModal.open} onOpenChange={(d) => !d.open && setBidsModal(prev => ({ ...prev, open: false }))}>
+        <DialogBackdrop bg="blackAlpha.700" backdropFilter="auto" backdropBlur="2px" />
+        <DialogPositioner inset="0" display="flex" alignItems="center" justifyContent="center" p={{ base: 4, sm: 6 }}>
+          <DialogContent bg="gray.900" color="white" maxW="2xl" maxH="80dvh" overflowY="auto" borderColor="gray.700" borderWidth="1px" rounded="md">
+            <DialogHeader>
+              <DialogTitle><Text fontWeight="bold">{bidsModal.title}</Text></DialogTitle>
+            </DialogHeader>
+            <DialogBody>
+              {bidsModal.loading && <Text color="gray.400">Loading bids…</Text>}
+              {!bidsModal.loading && bidsModal.items.length === 0 && (
+                <Text color="gray.500" fontSize="sm">No bids found.</Text>
+              )}
+              <Stack gap={2}>
+                {bidsModal.items.map((b) => (
+                  <Box key={b.id} bg="gray.800" rounded="md" px={3} py={2} display="grid" gridTemplateColumns="36px 12px 110px 12px 1fr 12px 120px" alignItems="center">
+                    <Box bg="gray.700" color="gray.100" px={2} py={0.5} rounded="full" fontSize="xs" textAlign="center">{b.committeeNumber ?? '-'}</Box>
+                    <Text color="gray.500" textAlign="center">•</Text>
+                    <Text color="gray.400" fontSize="sm">{(b.bidDate || b.createdAt)?.slice(0,10).split('-').reverse().join('-')}</Text>
+                    <Text color="gray.500" textAlign="center">•</Text>
+                    <Text color="gray.300" fontSize="sm" lineClamp={1}>{b.finalBidderName || '-'}</Text>
+                    <Text color="gray.500" textAlign="center">•</Text>
+                    <Text color="white" fontWeight="semibold" textAlign="right">₹{b.amount}</Text>
+                  </Box>
+                ))}
+              </Stack>
+            </DialogBody>
+            <DialogFooter>
+              <Button onClick={() => setBidsModal(prev => ({ ...prev, open: false }))}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </DialogPositioner>
+      </DialogRoot>
     </Box>
   );
 };
