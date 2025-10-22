@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Stack, Text, Button, Tabs, DialogRoot, DialogBackdrop, DialogPositioner, DialogContent, DialogHeader, DialogBody, DialogFooter, DialogTitle, Input } from '@chakra-ui/react';
-import { Plus, Edit, Trash2, ChevronRight } from 'lucide-react';
+import { Plus, Edit, Trash2, ChevronRight, User, UserPlus, Hand } from 'lucide-react';
 import CreateEditCommitteeModal from './CreateEditCommitteeModal';
 import type { CommitteeListItem, Committee } from '../../types/committee';
 import { committeeService } from '../../services/committeeService';
@@ -59,21 +59,22 @@ const CommitteeRow: React.FC<{ committee: CommitteeListItem; canManage?: boolean
           <Text color="gray.500">•</Text>
           <Text color="white" fontWeight="semibold">{rightAmount}</Text>
           <Text color="gray.500">•</Text>
-          <Box as="button" onClick={() => onShowMembers?.(committee)}
-               color="blue.300" _hover={{ color: 'blue.200' }} fontSize="sm">
-            Members
+          <Box as="button" onClick={() => onShowMembers?.(committee)} title="Members"
+               color="blue.300" _hover={{ color: 'blue.200' }} p={1}>
+            <User size={16} />
           </Box>
           <Text color="gray.500">•</Text>
-          <Box as="button" onClick={() => onShowBids?.(committee)}
-               color="blue.300" _hover={{ color: 'blue.200' }} fontSize="sm">
-            Bids
+          <Box as="button" onClick={() => onShowBids?.(committee)} title="Bids"
+               color="blue.300" _hover={{ color: 'blue.200' }} p={1} display="flex" alignItems="center" gap={0.5}>
+            <Hand size={14} />
+            <Hand size={14} />
           </Box>
           {canManage && (
             <>
               <Text color="gray.500">•</Text>
-              <Box as="button" onClick={() => onAddMembers?.(committee)}
-                   color="green.300" _hover={{ color: 'green.200' }} fontSize="sm">
-                Add Members
+              <Box as="button" onClick={() => onAddMembers?.(committee)} title="Add Members"
+                   color="green.300" _hover={{ color: 'green.200' }} p={1}>
+                <UserPlus size={16} />
               </Box>
             </>
           )}
@@ -102,7 +103,8 @@ const CommitteeGroup: React.FC<{
   onDelete: (id: string) => void;
   onShowMembers: (committee: CommitteeListItem) => void;
   onShowBids: (committee: CommitteeListItem) => void;
-}> = ({ owner, committees, isExpanded, onToggle, onEdit, onDelete, onShowMembers, onShowBids }) => (
+  onAddMembers?: (committee: CommitteeListItem) => void;
+}> = ({ owner, committees, isExpanded, onToggle, onEdit, onDelete, onShowMembers, onShowBids, onAddMembers }) => (
   <Box mb={6} bg="gray.900" borderColor="gray.800" borderWidth="1px" rounded="lg" p={2}>
     <Box
       display="flex"
@@ -136,6 +138,7 @@ const CommitteeGroup: React.FC<{
             onDelete={onDelete}
             onShowMembers={onShowMembers}
             onShowBids={onShowBids}
+            onAddMembers={onAddMembers}
           />
         ))}
       </Stack>
@@ -493,6 +496,7 @@ const Committees: React.FC = () => {
               onDelete={handleDeleteCommittee}
               onShowMembers={openMembers}
               onShowBids={openBids}
+              onAddMembers={openAddMembers}
             />
           ))}
         </Tabs.Content>
@@ -502,7 +506,7 @@ const Committees: React.FC = () => {
             <Text color="gray.400">
               Committees you own ({myOwnedCommittees.length} committees)
             </Text>
-            <Button colorPalette="red" rounded="full" onClick={handleCreateCommittee}>
+            <Button colorPalette="gray" variant="outline" rounded="full" onClick={handleCreateCommittee}>
               <Box mr={2} display="inline-flex"><Plus size={16} /></Box>
               Add Committee
             </Button>

@@ -42,7 +42,7 @@ const Bids: React.FC = () => {
         if (user.username) {
           const found = await memberService.searchMembers({ username: user.username });
           if (found?.length) {
-            const m2 = tryParse(found[0].id);
+            const m2 = tryParse(found[0].memberId);
             if (m2) return setEffectiveMemberId(m2);
           }
         }
