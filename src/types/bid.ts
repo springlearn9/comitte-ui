@@ -31,6 +31,16 @@ export interface BidResponseDTO {
   updatedTimestamp?: string;
 }
 
+// Request DTO for creating/updating bids
+export interface BidRequest {
+  comitteId: number;
+  comitteNumber?: number;
+  finalBidder?: number;
+  finalBidAmt?: number;
+  bidDate?: string; // ISO string for LocalDateTime
+  receiversList?: number[];
+}
+
 export const mapBidResponse = (r: BidResponseDTO): Bid => ({
   id: String(r.bidId),
   committeeId: r.comitteId,
