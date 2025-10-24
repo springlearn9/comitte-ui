@@ -83,7 +83,7 @@ const Bids: React.FC = () => {
   return (
     <Box p={6}>
       <Text as="h1" fontSize="2xl" fontWeight="bold" color="white" mb={2}>Bids</Text>
-      <Text color="gray.400" mb={6}>Bids grouped by committee (ordered by committee number desc)</Text>
+      <Text color="gray.400" mb={6}>Bids grouped by committee with bid amounts and monthly shares (ordered by committee number desc)</Text>
       {loading && <Text color="gray.400">Loading bids…</Text>}
       {error && <Text color="red.400">{error}</Text>}
       {/* Grouped by committeeId */}
@@ -122,11 +122,32 @@ const Bids: React.FC = () => {
               </Box>
               {isOpen && (
                 <Stack gap={2} mt={2}>
+                  {/* Header row */}
+                  <Box
+                    display="grid"
+                    gridTemplateColumns="36px 12px 110px 12px 1fr 12px 120px 12px 120px"
+                    alignItems="center"
+                    gap={0}
+                    px={3}
+                    py={1}
+                    borderBottom="1px solid"
+                    borderColor="gray.700"
+                  >
+                    <Text color="gray.500" fontSize="xs" textAlign="center">#</Text>
+                    <Text></Text>
+                    <Text color="gray.500" fontSize="xs">Date</Text>
+                    <Text></Text>
+                    <Text color="gray.500" fontSize="xs">Bidder</Text>
+                    <Text></Text>
+                    <Text color="gray.500" fontSize="xs" textAlign="right">Bid Amount</Text>
+                    <Text></Text>
+                    <Text color="gray.500" fontSize="xs" textAlign="right">Monthly Share</Text>
+                  </Box>
                   {list.map((b) => (
                     <Box
                       key={b.id}
                       display="grid"
-                      gridTemplateColumns="36px 12px 110px 12px 1fr 12px 120px"
+                      gridTemplateColumns="36px 12px 110px 12px 1fr 12px 120px 12px 120px"
                       alignItems="center"
                       gap={0}
                       bg="gray.800"
@@ -152,6 +173,12 @@ const Bids: React.FC = () => {
                       <Text color="gray.500" textAlign="center">•</Text>
                       {/* Col 7: amount right-aligned */}
                       <Text color="white" fontWeight="semibold" textAlign="right">₹{b.amount}</Text>
+                      {/* Col 8: bullet */}
+                      <Text color="gray.500" textAlign="center">•</Text>
+                      {/* Col 9: monthly share right-aligned */}
+                      <Text color="green.400" fontWeight="semibold" textAlign="right">
+                        {b.monthlyShare ? `₹${b.monthlyShare}` : '-'}
+                      </Text>
                     </Box>
                   ))}
                 </Stack>

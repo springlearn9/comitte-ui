@@ -6,6 +6,7 @@ export interface Bid {
   finalBidderId: number;
   finalBidderName?: string;
   amount: number; // finalBidAmt
+  monthlyShare?: number;
   bidDate?: string; // bidDate
   createdAt?: string;
   updatedAt?: string;
@@ -22,6 +23,7 @@ export interface BidResponseDTO {
   finalBidderId: number;
   finalBidderName?: string;
   finalBidAmt: number;
+  monthlyShare?: number;
   bidDate?: string;
   bidItems?: any[];
   receiversList?: any[];
@@ -37,6 +39,7 @@ export const mapBidResponse = (r: BidResponseDTO): Bid => ({
   finalBidderId: r.finalBidderId,
   finalBidderName: r.finalBidderName,
   amount: r.finalBidAmt,
+  monthlyShare: r.monthlyShare,
   bidDate: r.bidDate,
   createdAt: r.createdTimestamp,
   updatedAt: r.updatedTimestamp,
