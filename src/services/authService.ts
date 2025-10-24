@@ -44,6 +44,18 @@ export interface MemberResponse {
   updatedTimestamp?: string;
 }
 
+export interface CommitteMemberMapResponse {
+  id: number;
+  comitteId: number;
+  memberId: number;
+  comitteName: string;
+  memberName: string;
+  memberMobile: string;
+  shareCount: number;
+  createdTimestamp: string;
+  updatedTimestamp: string;
+}
+
 class AuthService {
   private tokenKey = 'auth_token';
   private userKey = 'auth_user';

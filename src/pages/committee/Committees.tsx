@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Stack, Text, Button, Tabs, DialogRoot, DialogBackdrop, DialogPositioner, DialogContent, DialogHeader, DialogBody, DialogFooter, DialogTitle, Input } from '@chakra-ui/react';
-import { Plus, Edit, Trash2, ChevronRight, User, UserPlus, Hand } from 'lucide-react';
+import { Plus, Edit, Trash2, ChevronRight, UserPlus, Users, IndianRupee } from 'lucide-react';
 import CreateEditCommitteeModal from './CreateEditCommitteeModal';
 import type { CommitteeListItem, Committee } from '../../types/committee';
 import { committeeService } from '../../services/committeeService';
@@ -9,7 +9,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { memberService } from '../../services/memberService';
 import { bidService } from '../../services/bidService';
 import { mapBidResponse, type Bid } from '../../types/bid';
-import type { MemberResponse } from '../../services/authService';
+import type { MemberResponse, CommitteMemberMapResponse } from '../../services/authService';
 
 
 // Helpers
@@ -60,31 +60,30 @@ const CommitteeRow: React.FC<{ committee: CommitteeListItem; canManage?: boolean
           <Text color="white" fontWeight="semibold">{rightAmount}</Text>
           <Text color="gray.500">•</Text>
           <Box as="button" onClick={() => onShowMembers?.(committee)} title="Members"
-               color="blue.300" _hover={{ color: 'blue.200' }} p={1}>
-            <User size={16} />
+               color="blue.300" _hover={{ color: 'blue.200', bg: 'gray.700' }} p={1} cursor="pointer" borderRadius="md">
+            <Users size={20} />
           </Box>
           <Text color="gray.500">•</Text>
           <Box as="button" onClick={() => onShowBids?.(committee)} title="Bids"
-               color="blue.300" _hover={{ color: 'blue.200' }} p={1} display="flex" alignItems="center" gap={0.5}>
-            <Hand size={14} />
-            <Hand size={14} />
+               color="blue.300" _hover={{ color: 'blue.200', bg: 'gray.700' }} p={1} cursor="pointer" borderRadius="md">
+            <IndianRupee size={20} />
           </Box>
           {canManage && (
             <>
               <Text color="gray.500">•</Text>
               <Box as="button" onClick={() => onAddMembers?.(committee)} title="Add Members"
-                   color="green.300" _hover={{ color: 'green.200' }} p={1}>
-                <UserPlus size={16} />
+                   color="green.300" _hover={{ color: 'green.200', bg: 'gray.700' }} p={1} cursor="pointer" borderRadius="md">
+                <UserPlus size={20} />
               </Box>
             </>
           )}
           {canManage && (
             <Box display="inline-flex" gap={2} ml={2}>
-              <Box as="button" onClick={() => onEdit?.(committee)} title="Edit" p={1} _hover={{ bg: 'gray.700', color: 'blue.300' }} rounded="md" color="blue.400">
-                <Edit size={16} />
+              <Box as="button" onClick={() => onEdit?.(committee)} title="Edit" p={1} _hover={{ bg: 'gray.700', color: 'blue.300' }} rounded="md" color="blue.400" cursor="pointer">
+                <Edit size={20} />
               </Box>
-              <Box as="button" onClick={() => committee.id && onDelete?.(committee.id)} title="Delete" p={1} _hover={{ bg: 'gray.700', color: 'red.300' }} rounded="md" color="red.400">
-                <Trash2 size={16} />
+              <Box as="button" onClick={() => committee.id && onDelete?.(committee.id)} title="Delete" p={1} _hover={{ bg: 'gray.700', color: 'red.300' }} rounded="md" color="red.400" cursor="pointer">
+                <Trash2 size={20} />
               </Box>
             </Box>
           )}
@@ -160,7 +159,7 @@ const Committees: React.FC = () => {
   const [effectiveMemberId, setEffectiveMemberId] = useState<number>(0);
 
   // Popups state
-  const [membersModal, setMembersModal] = useState<{ open: boolean; title: string; loading: boolean; items: MemberResponse[] }>({ open: false, title: '', loading: false, items: []});
+  const [membersModal, setMembersModal] = useState<{ open: boolean; title: string; loading: boolean; items: CommitteMemberMapResponse[] }>({ open: false, title: '', loading: false, items: []});
   const [bidsModal, setBidsModal] = useState<{ open: boolean; title: string; loading: boolean; items: Bid[] }>({ open: false, title: '', loading: false, items: []});
   const [addMembersModal, setAddMembersModal] = useState<{ open: boolean; committee: CommitteeListItem | null; searchText: string; loading: boolean; searchResults: MemberResponse[] }>({ open: false, committee: null, searchText: '', loading: false, searchResults: [] });
 
@@ -557,9 +556,10 @@ const Committees: React.FC = () => {
               )}
               <Stack gap={2}>
                 {membersModal.items.map((m) => (
-                  <Box key={m.memberId} bg="gray.800" rounded="md" px={3} py={2} display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
-                    <Text color="white" fontSize="sm">{m.name || m.username}</Text>
-                    <Text color="gray.400" fontSize="sm" textAlign="right">{m.mobile || m.email}</Text>
+                  <Box key={m.id} bg="gray.800" rounded="md" px={3} py={2} display="grid" gridTemplateColumns="1fr auto auto" gap={4} alignItems="center">
+                    <Text color="white" fontSize="sm">{m.memberName}</Text>
+                    <Text color="gray.400" fontSize="sm">{m.memberMobile}</Text>
+                    <Text color="gray.400" fontSize="sm">{m.shareCount}</Text>
                   </Box>
                 ))}
               </Stack>

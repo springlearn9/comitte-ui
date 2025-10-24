@@ -21,6 +21,12 @@ class BidService {
     const { data } = await this.api.get<BidResponseDTO[]>(`/comittes/${comitteId}/bids`);
     return data;
   }
+
+  // GET /api/bids/member/{memberId}/committee-bids
+  async getByMember(memberId: number) {
+    const { data } = await this.api.get<BidResponseDTO[]>(`/bids/member/${memberId}/committee-bids`);
+    return data;
+  }
 }
 
 export const bidService = new BidService();

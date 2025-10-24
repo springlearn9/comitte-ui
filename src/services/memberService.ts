@@ -1,6 +1,5 @@
 import axios from 'axios';
-import { authService } from './authService';
-import type { MemberResponse } from './authService';
+import { authService, type MemberResponse, type CommitteMemberMapResponse } from './authService';
 
 class MemberService {
   private api = axios.create({
@@ -26,8 +25,8 @@ class MemberService {
   }
 
   // GET /api/comittes/{id}/members
-  async getByCommittee(comitteId: number): Promise<MemberResponse[]> {
-    const { data } = await this.api.get<MemberResponse[]>(`/comittes/${comitteId}/members`);
+  async getByCommittee(comitteId: number): Promise<CommitteMemberMapResponse[]> {
+    const { data } = await this.api.get<CommitteMemberMapResponse[]>(`/comittes/${comitteId}/members`);
     return data;
   }
 }

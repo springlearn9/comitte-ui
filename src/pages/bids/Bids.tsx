@@ -3,8 +3,6 @@ import { Box, Stack, Text } from '@chakra-ui/react';
 import { ChevronRight } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { memberService } from '../../services/memberService';
-import { committeeService } from '../../services/committeeService';
-import { mapResponseToListItem } from '../../types/committee';
 import { bidService } from '../../services/bidService';
 import { mapBidResponse, type Bid } from '../../types/bid';
 
@@ -53,37 +51,21 @@ const Bids: React.FC = () => {
     resolveMemberId();
   }, [user]);
 
-  // Load committees and then bids
+  // Load bids directly for the member
   useEffect(() => {
     const load = async () => {
       if (!Number.isFinite(effectiveMemberId) || effectiveMemberId <= 0) return;
       setLoading(true); setError(null);
       try {
-        const [memberData, ownerData] = await Promise.all([
-          committeeService.getByMember(effectiveMemberId),
-          committeeService.getByOwner(effectiveMemberId),
-        ]);
-        const all = [...memberData, ...ownerData];
-        // Unique by comitteId
-        const seen = new Set<number>();
-        const list = all
-          .filter(r => { if (seen.has(r.comitteId)) return false; seen.add(r.comitteId); return true; })
-          .map(mapResponseToListItem);
-        // Fetch bids for each
-        const bids = await Promise.all(
-          list.map(async (c) => {
-            const data = await bidService.getByCommittee(Number(c.id));
-            return [c.id, data.map(mapBidResponse)] as const;
-          })
-        );
+        const bidsData = await bidService.getByMember(effectiveMemberId);
+        const bids = bidsData.map(mapBidResponse);
+        
         // Group by committeeId and order within group by committeeNumber desc
         const grouped: Record<number, Bid[]> = {};
-        bids.forEach(([_, arr]) => {
-          arr.forEach((bid) => {
-            const cid = bid.committeeId;
-            if (!grouped[cid]) grouped[cid] = [];
-            grouped[cid].push(bid);
-          });
+        bids.forEach((bid) => {
+          const cid = bid.committeeId;
+          if (!grouped[cid]) grouped[cid] = [];
+          grouped[cid].push(bid);
         });
         Object.values(grouped).forEach(list => {
           list.sort((a, b) => (b.committeeNumber ?? -Infinity) - (a.committeeNumber ?? -Infinity));
