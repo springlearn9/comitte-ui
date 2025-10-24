@@ -189,14 +189,27 @@ const CreateBidModal: React.FC<CreateBidModalProps> = ({
                 variant="outline"
                 onClick={handleClose}
                 disabled={loading}
-                colorScheme="gray"
+                colorPalette="gray"
+                rounded="full"
+                bg="gray.700"
+                color="gray.300"
+                borderColor="gray.600"
+                _hover={{ bg: 'gray.600', color: 'white', borderColor: 'gray.500' }}
+                transition="all 0.2s"
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
                 loading={loading}
-                colorScheme="blue"
+                colorPalette="gray"
+                variant="outline"
+                rounded="full"
+                bg="gray.600"
+                color="white"
+                borderColor="gray.500"
+                _hover={{ bg: 'white', color: 'black', borderColor: 'gray.400' }}
+                transition="all 0.2s"
                 disabled={!formData.comitteId}
               >
                 {loading ? 'Creating...' : 'Create Bid'}

@@ -324,14 +324,27 @@ const CreateEditCommitteeModal: React.FC<CreateEditCommitteeModalProps> = ({
             <Button
               variant="outline"
               colorPalette="gray"
-              color="gray.200"
+              rounded="full"
+              bg="gray.700"
+              color="gray.300"
               borderColor="gray.600"
-              _hover={{ bg: 'gray.800', borderColor: 'gray.500', color: 'white' }}
+              _hover={{ bg: 'gray.600', color: 'white', borderColor: 'gray.500' }}
+              transition="all 0.2s"
               onClick={handleClose}
             >
               Cancel
             </Button>
-            <Button colorPalette="red" onClick={handleSave}>
+            <Button 
+              colorPalette="gray"
+              variant="outline"
+              rounded="full"
+              bg="gray.600"
+              color="white"
+              borderColor="gray.500"
+              _hover={{ bg: 'white', color: 'black', borderColor: 'gray.400' }}
+              transition="all 0.2s"
+              onClick={handleSave}
+            >
               {mode === 'create' ? 'Create Committee' : 'Update Committee'}
             </Button>
           </Stack>

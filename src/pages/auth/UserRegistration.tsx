@@ -324,7 +324,7 @@ const UserRegistration: React.FC = () => {
                 {currentStep > 1 && (
                   <Button
                     onClick={handlePrevious}
-                    className="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-medium text-sm h-10"
+                    className="flex-1 bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white border border-gray-600 hover:border-gray-500 font-medium text-sm h-10 rounded-full transition-all duration-200"
                   >
                     Previous
                   </Button>
@@ -333,14 +333,14 @@ const UserRegistration: React.FC = () => {
                 {currentStep < 3 ? (
                   <Button
                     onClick={handleNext}
-                    className="flex-1 bg-red-600 hover:bg-red-700 text-white font-medium text-sm h-10"
+                    className="flex-1 bg-gray-600 hover:bg-white text-white hover:text-black border border-gray-500 hover:border-gray-400 font-medium text-sm h-10 rounded-full transition-all duration-200"
                   >
                     Next
                   </Button>
                 ) : (
                   <Button
                     onClick={handleSubmit}
-                    className="flex-1 bg-red-600 hover:bg-red-700 text-white font-medium text-sm h-10"
+                    className="flex-1 bg-gray-600 hover:bg-white text-white hover:text-black border border-gray-500 hover:border-gray-400 font-medium text-sm h-10 rounded-full transition-all duration-200"
                     isLoading={isLoading}
                     isDisabled={isLoading}
                   >

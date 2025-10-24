@@ -60,7 +60,19 @@ const ForgotPassword: React.FC = () => {
               </Text>
               <Box pt={4}>
                 <RLink to="/auth/signin">
-                  <Button colorPalette="red" w="full">Back to Sign In</Button>
+                  <Button 
+                    colorPalette="gray"
+                    variant="outline"
+                    rounded="full"
+                    bg="gray.600"
+                    color="white"
+                    borderColor="gray.500"
+                    _hover={{ bg: 'white', color: 'black', borderColor: 'gray.400' }}
+                    transition="all 0.2s"
+                    w="full"
+                  >
+                    Back to Sign In
+                  </Button>
                 </RLink>
               </Box>
             </Stack>
@@ -117,7 +129,14 @@ const ForgotPassword: React.FC = () => {
 
               <Button
                 type="submit"
-                colorPalette="red"
+                colorPalette="gray"
+                variant="outline"
+                rounded="full"
+                bg="gray.600"
+                color="white"
+                borderColor="gray.500"
+                _hover={{ bg: 'white', color: 'black', borderColor: 'gray.400' }}
+                transition="all 0.2s"
                 w="full"
                 h={11}
                 disabled={!email || isLoading}

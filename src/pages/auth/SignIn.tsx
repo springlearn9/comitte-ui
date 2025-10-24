@@ -92,7 +92,14 @@ const SignIn: React.FC = () => {
 
               <Button
                 type="submit"
-                colorPalette="red"
+                colorPalette="gray"
+                variant="outline"
+                rounded="full"
+                bg="gray.600"
+                color="white"
+                borderColor="gray.500"
+                _hover={{ bg: 'white', color: 'black', borderColor: 'gray.400' }}
+                transition="all 0.2s"
                 w="full"
                 h={{ base: 11, sm: 12 }}
                 disabled={!username || !password || isLoading}
