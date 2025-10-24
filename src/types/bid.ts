@@ -34,7 +34,6 @@ export interface BidResponseDTO {
 // Request DTO for creating/updating bids
 export interface BidRequest {
   comitteId: number;
-  comitteNumber?: number;
   finalBidder?: number;
   finalBidAmt?: number;
   bidDate?: string; // ISO string for LocalDateTime

@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Stack, Text, Button } from '@chakra-ui/react';
-import { ChevronRight, Plus } from 'lucide-react';
+import { ChevronRight, Plus, Edit } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { memberService } from '../../services/memberService';
 import { bidService } from '../../services/bidService';
 import { mapBidResponse, type Bid } from '../../types/bid';
 import CreateBidModal from './CreateBidModal';
+import EditBidModal from './EditBidModal';
 
 const formatDateTime = (iso?: string) => {
   if (!iso) return '';
@@ -28,6 +29,7 @@ const Bids: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [createBidModal, setCreateBidModal] = useState<{ open: boolean; committeeId?: number; committeeName?: string }>({ open: false });
+  const [editBidModal, setEditBidModal] = useState<{ open: boolean; bid: Bid | null }>({ open: false, bid: null });
 
   // Resolve member id similar to Committees page
   useEffect(() => {
@@ -84,6 +86,10 @@ const Bids: React.FC = () => {
 
   const handleCreateBid = (committeeId?: number, committeeName?: string) => {
     setCreateBidModal({ open: true, committeeId, committeeName });
+  };
+
+  const handleEditBid = (bid: Bid) => {
+    setEditBidModal({ open: true, bid });
   };
 
   const handleBidCreated = () => {
@@ -193,7 +199,7 @@ const Bids: React.FC = () => {
                   {/* Header row */}
                   <Box
                     display="grid"
-                    gridTemplateColumns="36px 110px 1fr 120px 120px"
+                    gridTemplateColumns="36px 110px 1fr 120px 120px 60px"
                     alignItems="center"
                     gap={3}
                     px={3}
@@ -206,12 +212,13 @@ const Bids: React.FC = () => {
                     <Text color="gray.500" fontSize="xs">Bidder</Text>
                     <Text color="gray.500" fontSize="xs" textAlign="right">Bid Amount</Text>
                     <Text color="gray.500" fontSize="xs" textAlign="right">Monthly Share</Text>
+                    <Text color="gray.500" fontSize="xs" textAlign="center">Actions</Text>
                   </Box>
                   {list.map((b) => (
                     <Box
                       key={b.id}
                       display="grid"
-                      gridTemplateColumns="36px 110px 1fr 120px 120px"
+                      gridTemplateColumns="36px 110px 1fr 120px 120px 60px"
                       alignItems="center"
                       gap={3}
                       bg="gray.800"
@@ -235,6 +242,21 @@ const Bids: React.FC = () => {
                       <Text color="green.400" fontWeight="semibold" textAlign="right">
                         {b.monthlyShare ? `₹${b.monthlyShare}` : '-'}
                       </Text>
+                      {/* Col 6: edit action */}
+                      <Box display="flex" justifyContent="center">
+                        <Box 
+                          as="button" 
+                          onClick={() => handleEditBid(b)} 
+                          title="Edit Bid"
+                          color="blue.300" 
+                          _hover={{ color: 'blue.200', bg: 'gray.700' }} 
+                          p={2} 
+                          cursor="pointer" 
+                          borderRadius="full"
+                        >
+                          <Edit size={16} />
+                        </Box>
+                      </Box>
                     </Box>
                   ))}
                 </Stack>
@@ -254,6 +276,14 @@ const Bids: React.FC = () => {
         onSuccess={handleBidCreated}
         committeeId={createBidModal.committeeId}
         committeeName={createBidModal.committeeName}
+      />
+
+      {/* Edit Bid Modal */}
+      <EditBidModal
+        isOpen={editBidModal.open}
+        onClose={() => setEditBidModal({ open: false, bid: null })}
+        onSuccess={handleBidCreated}
+        bid={editBidModal.bid}
       />
     </Box>
   );

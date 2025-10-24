@@ -33,6 +33,12 @@ class BidService {
     const { data } = await this.api.post<BidResponseDTO>('/bids', bidRequest);
     return data;
   }
+
+  // PUT /api/bids/{bidId}
+  async updateBid(bidId: string, bidRequest: BidRequest): Promise<BidResponseDTO> {
+    const { data } = await this.api.put<BidResponseDTO>(`/bids/${bidId}`, bidRequest);
+    return data;
+  }
 }
 
 export const bidService = new BidService();

@@ -14,31 +14,29 @@ import {
   DialogFooter,
   DialogTitle
 } from '@chakra-ui/react';
-import type { BidRequest } from '../../types/bid';
+import type { BidRequest, Bid } from '../../types/bid';
 import { bidService } from '../../services/bidService';
 import { memberService } from '../../services/memberService';
 import type { CommitteMemberMapResponse } from '../../services/authService';
 
-interface CreateBidModalProps {
+interface EditBidModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  committeeId?: number;
-  committeeName?: string;
+  bid: Bid | null;
 }
 
-const CreateBidModal: React.FC<CreateBidModalProps> = ({
+const EditBidModal: React.FC<EditBidModalProps> = ({
   isOpen,
   onClose,
   onSuccess,
-  committeeId,
-  committeeName
+  bid
 }) => {
   const [formData, setFormData] = useState<Partial<BidRequest>>({
-    comitteId: committeeId,
+    comitteId: undefined,
     finalBidder: undefined,
     finalBidAmt: undefined,
-    bidDate: new Date().toISOString(), // Full ISO string for LocalDateTime
+    bidDate: new Date().toISOString(),
     receiversList: []
   });
   const [loading, setLoading] = useState(false);
@@ -46,34 +44,38 @@ const CreateBidModal: React.FC<CreateBidModalProps> = ({
   const [committeeMembers, setCommitteeMembers] = useState<CommitteMemberMapResponse[]>([]);
   const [loadingMembers, setLoadingMembers] = useState(false);
 
-  // Update formData when committeeId prop changes
+  // Update formData when bid changes
   useEffect(() => {
-    if (committeeId) {
-      setFormData(prev => ({
-        ...prev,
-        comitteId: committeeId
-      }));
+    if (bid) {
+      setFormData({
+        comitteId: bid.committeeId,
+        finalBidder: bid.finalBidderId,
+        finalBidAmt: bid.amount,
+        bidDate: bid.bidDate || new Date().toISOString(),
+        receiversList: bid.receiversList as number[] || []
+      });
     }
-  }, [committeeId]);
+  }, [bid]);
 
   // Fetch committee members when modal opens
   useEffect(() => {
     const fetchMembers = async () => {
-      if (!isOpen || !committeeId) return;
+      if (!isOpen || !bid?.committeeId) return;
       
       setLoadingMembers(true);
       try {
-        const members = await memberService.getByCommittee(committeeId);
+        const members = await memberService.getByCommittee(bid.committeeId);
         setCommitteeMembers(members);
       } catch (err) {
         console.error('Failed to fetch committee members:', err);
+        setCommitteeMembers([]);
       } finally {
         setLoadingMembers(false);
       }
     };
 
     fetchMembers();
-  }, [isOpen, committeeId]);
+  }, [isOpen, bid?.committeeId]);
 
   const handleInputChange = (field: keyof BidRequest, value: any) => {
     setFormData(prev => ({
@@ -84,36 +86,25 @@ const CreateBidModal: React.FC<CreateBidModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.comitteId) {
-      setError('Committee ID is required');
-      return;
-    }
+    if (!bid?.id) return;
 
     setLoading(true);
     setError(null);
 
     try {
       const bidRequest: BidRequest = {
-        comitteId: formData.comitteId,
+        comitteId: formData.comitteId!,
         finalBidder: formData.finalBidder,
         finalBidAmt: formData.finalBidAmt,
         bidDate: formData.bidDate,
         receiversList: formData.receiversList || []
       };
 
-      await bidService.createBid(bidRequest);
+      await bidService.updateBid(bid.id, bidRequest);
       onSuccess();
       onClose();
-      // Reset form
-      setFormData({
-        comitteId: committeeId,
-        finalBidder: undefined,
-        finalBidAmt: undefined,
-        bidDate: new Date().toISOString(),
-        receiversList: []
-      });
     } catch (err: any) {
-      setError(err?.response?.data?.message || err?.message || 'Failed to create bid');
+      setError(err?.response?.data?.message || err?.message || 'Failed to update bid');
     } finally {
       setLoading(false);
     }
@@ -124,6 +115,8 @@ const CreateBidModal: React.FC<CreateBidModalProps> = ({
     onClose();
   };
 
+  if (!bid) return null;
+
   return (
     <DialogRoot open={isOpen} onOpenChange={(d) => !d.open && handleClose()}>
       <DialogBackdrop bg="blackAlpha.700" backdropFilter="auto" backdropBlur="2px" />
@@ -131,10 +124,10 @@ const CreateBidModal: React.FC<CreateBidModalProps> = ({
         <DialogContent bg="gray.900" color="white" maxW="lg" maxH="80dvh" overflowY="auto" borderColor="gray.700" borderWidth="1px" rounded="md">
           <DialogHeader>
             <DialogTitle>
-              <Text fontWeight="bold">Create New Bid</Text>
-              {committeeName && (
+              <Text fontWeight="bold">Edit Bid</Text>
+              {bid.committeeName && (
                 <Text fontSize="sm" color="gray.400" mt={1}>
-                  Committee: {committeeName}
+                  Committee: {bid.committeeName}
                 </Text>
               )}
             </DialogTitle>
@@ -260,7 +253,7 @@ const CreateBidModal: React.FC<CreateBidModalProps> = ({
                 transition="all 0.2s"
                 disabled={!formData.finalBidder || !formData.finalBidAmt || loading}
               >
-                {loading ? 'Creating...' : 'Create Bid'}
+                {loading ? 'Updating...' : 'Update Bid'}
               </Button>
             </DialogFooter>
           </form>
@@ -270,4 +263,4 @@ const CreateBidModal: React.FC<CreateBidModalProps> = ({
   );
 };
 
-export default CreateBidModal;
+export default EditBidModal;
