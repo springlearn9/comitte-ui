@@ -119,23 +119,8 @@ const Bids: React.FC = () => {
 
   return (
     <Box p={6}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+      <Box mb={2}>
         <Text as="h1" fontSize="2xl" fontWeight="bold" color="white">Bids</Text>
-        <Button
-          colorPalette="gray"
-          variant="outline"
-          rounded="full"
-          bg="gray.600"
-          color="white"
-          borderColor="gray.500"
-          _hover={{ bg: 'white', color: 'black', borderColor: 'gray.400' }}
-          transition="all 0.2s"
-          onClick={() => handleCreateBid()}
-          size="sm"
-        >
-          <Plus size={16} style={{ marginRight: '8px' }} />
-          Create Bid
-        </Button>
       </Box>
       <Text color="gray.400" mb={6}>Bids grouped by committee with bid amounts and monthly shares (ordered by committee number desc)</Text>
       {loading && <Text color="gray.400">Loading bids…</Text>}

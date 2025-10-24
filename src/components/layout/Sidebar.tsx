@@ -2,9 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
-  Users, 
   FileText, 
-  UserPlus, 
   LogOut, 
   Briefcase,
   BarChart3,
@@ -33,16 +31,6 @@ const Sidebar: React.FC = () => {
       icon: <FileText className="w-5 h-5" />,
       label: 'Bids',
       path: '/bids',
-    },
-    {
-      icon: <Users className="w-5 h-5" />,
-      label: 'Members',
-      path: '/members',
-    },
-    {
-      icon: <UserPlus className="w-5 h-5" />,
-      label: 'Attach Mem',
-      path: '/attach-member',
     },
     {
       icon: <BarChart3 className="w-5 h-5" />,
