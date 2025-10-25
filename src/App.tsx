@@ -7,6 +7,9 @@ import Dashboard from './pages/Dashboard';
 import Bids from './pages/bids/Bids';
 import { Committees } from './pages/committee';
 import { SignIn, SignUp, ForgotPassword, UserRegistration } from './pages/auth';
+import About from './pages/About';
+import Feedback from './pages/Feedback';
+import AppGallery from './pages/AppGallery';
 import Sidebar from './components/layout/Sidebar';
 import Header from './components/layout/Header';
 
@@ -78,6 +81,30 @@ const AppContent: React.FC = () => {
         element={
           <ProtectedRoute>
             <Bids />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/about"
+        element={
+          <ProtectedRoute>
+            <About />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/feedback"
+        element={
+          <ProtectedRoute>
+            <Feedback />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/app-gallery"
+        element={
+          <ProtectedRoute>
+            <AppGallery />
           </ProtectedRoute>
         }
       />

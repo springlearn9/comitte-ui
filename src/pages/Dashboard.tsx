@@ -6,15 +6,16 @@ const Dashboard: React.FC = () => {
   const { user } = useAuth();
 
   return (
-    <Stack gap={{ base: 4, sm: 6 }}>
-      <Box>
-        <Heading size={{ base: 'lg', sm: 'xl' }} color="white" mb={2}>
-          Welcome back, {user?.username || 'User'}!
-        </Heading>
-        <Text color="gray.400" fontSize={{ base: 'sm', sm: 'md' }}>
-          Committee Management Dashboard
-        </Text>
-      </Box>
+    <Box p={6}>
+      <Stack gap={{ base: 4, sm: 6 }}>
+        <Box>
+          <Heading size={{ base: 'lg', sm: 'xl' }} color="white" mb={2}>
+            Welcome back, {user?.username || 'User'}!
+          </Heading>
+          <Text color="gray.400" fontSize={{ base: 'sm', sm: 'md' }}>
+            Committee Management Dashboard
+          </Text>
+        </Box>
 
       <SimpleGrid columns={{ base: 1, sm: 2, lg: 3 }} gap={{ base: 4, sm: 6 }}>
         <Box bg="gray.900" borderColor="gray.800" borderWidth="1px" rounded="lg" p={{ base: 4, sm: 5 }}>
@@ -64,6 +65,7 @@ const Dashboard: React.FC = () => {
         </Box>
       </Box>
     </Stack>
+    </Box>
   );
 };
 
