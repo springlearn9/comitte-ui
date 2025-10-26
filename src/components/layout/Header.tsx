@@ -7,7 +7,7 @@ const Header: React.FC = () => {
   const { user, logout } = useAuth();
 
   return (
-    <Box as="header" bg="gray.900" borderBottomWidth="1px" borderColor="gray.800" px={6} py={4} backdropFilter="auto" backdropBlur="sm">
+    <Box as="header" bg="gray.900" borderBottomWidth="1px" borderColor="gray.800" px={6} py={5} backdropFilter="auto" backdropBlur="sm">
       <Box display="flex" alignItems="center" justifyContent="space-between">
         {/* Search */}
         <Box flex="1" maxW="xl" position="relative">
