@@ -19,6 +19,7 @@ interface DashboardStats {
     monthlyShare?: number;
     committeeName?: string;
     bidderName?: string;
+    bidsRatio?: string;
     timestamp: string;
   }>;
 }
@@ -99,6 +100,7 @@ const Dashboard: React.FC = () => {
           monthlyShare?: number;
           committeeName?: string;
           bidderName?: string;
+          bidsRatio?: string;
           timestamp: string;
           date: Date;
         }> = [];
@@ -126,6 +128,10 @@ const Dashboard: React.FC = () => {
             const amount = bid.finalBidAmt || 0;
             const monthlyShare = bid.monthlyShare || 0;
             
+            // Find matching committee to get bidsRatio
+            const matchingCommittee = committeesData.find(c => c.comitteId === bid.comitteId);
+            const bidsRatio = matchingCommittee?.bidsRatio ? String(matchingCommittee.bidsRatio) : '';
+            
             recentActivity.push({
               id: `bid-${bid.bidId}`,
               type: 'bid',
@@ -135,6 +141,7 @@ const Dashboard: React.FC = () => {
               monthlyShare: monthlyShare,
               committeeName: committee,
               bidderName: bidder,
+              bidsRatio: bidsRatio,
               timestamp: bid.createdTimestamp,
               date: new Date(bid.createdTimestamp)
             });
@@ -243,29 +250,54 @@ const Dashboard: React.FC = () => {
                       <Box key={activity.id} bg="gray.800" rounded="lg" p={4} borderLeft="4px solid" borderColor={activity.type === 'bid' ? 'green.500' : 'blue.500'}>
                         <Box display="flex" alignItems="start" justifyContent="between" gap={3}>
                           <Box flex="1">
-                            <Box display="flex" alignItems="center" gap={2} mb={3}>
-                              <Box p={1} bg={activity.type === 'bid' ? 'green.600' : 'blue.600'} rounded="md">
-                                <IndianRupee size={14} color="white" />
+                            <Box display="flex" alignItems="center" justifyContent="space-between" mb={3}>
+                              <Box display="flex" alignItems="center" gap={2}>
+                                <Text color="blue.400" fontSize="sm" fontWeight="bold">
+                                  {activity.committeeName}
+                                </Text>
                               </Box>
-                              <Text color="blue.400" fontSize="sm" fontWeight="bold">
-                                {activity.committeeName}
-                              </Text>
+                              {activity.bidsRatio && (
+                                <Text color="gray.400" fontSize="xs">
+                                  ({activity.bidsRatio})
+                                </Text>
+                              )}
                             </Box>
                             
                             <Text color="white" fontSize={{ base: 'sm', sm: 'md' }} mb={3} lineHeight="1.5">
                               <Text as="span" color="green.400" fontWeight="bold">{activity.bidderName}</Text>
-                              <Text as="span"> has picked this comitte at loss of </Text>
-                              <Text as="span" color="red.400" fontWeight="bold">₹{formatCurrency(activity.amount || 0)}</Text>
+                              <Text as="span"> picked it at a loss of </Text>
+                              <Text as="span" color="red.400" fontWeight="bold">{formatCurrency(activity.amount || 0)}</Text>
                             </Text>
                             
-                            <Box display="flex" alignItems="center" justifyContent="flex-end" gap={2}>
-                              <Box display="flex" alignItems="center" gap={1}>
-                                <Calendar size={12} color="#9ca3af" />
-                                <Text color="gray.400" fontSize="xs">
-                                  {formatRelativeTime(activity.timestamp)}
-                                </Text>
+                            {activity.monthlyShare && (
+                              <Box display="flex" alignItems="center" justifyContent="space-between" mb={3}>
+                                <Box display="flex" alignItems="center" gap={2}>
+                                  <Text color="gray.400" fontSize="xs">Monthly Share</Text>
+                                  <Box display="flex" alignItems="center" gap={1}>
+                                    <IndianRupee size={14} color="#3b82f6" />
+                                    <Text color="blue.400" fontSize="md" fontWeight="bold">
+                                      {formatCurrency(activity.monthlyShare)}
+                                    </Text>
+                                  </Box>
+                                </Box>
+                                <Box display="flex" alignItems="center" gap={1}>
+                                  <Calendar size={12} color="#9ca3af" />
+                                  <Text color="gray.400" fontSize="xs">
+                                    {formatRelativeTime(activity.timestamp)}
+                                  </Text>
+                                </Box>
                               </Box>
-                            </Box>
+                            )}
+                            {!activity.monthlyShare && (
+                              <Box display="flex" alignItems="center" justifyContent="flex-end" gap={2}>
+                                <Box display="flex" alignItems="center" gap={1}>
+                                  <Calendar size={12} color="#9ca3af" />
+                                  <Text color="gray.400" fontSize="xs">
+                                    {formatRelativeTime(activity.timestamp)}
+                                  </Text>
+                                </Box>
+                              </Box>
+                            )}
                           </Box>
                         </Box>
                       </Box>
