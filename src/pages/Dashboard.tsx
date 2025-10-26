@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Stack, Heading, Text, SimpleGrid } from '@chakra-ui/react';
+import { Box, Stack, Heading, Text, SimpleGrid, Badge } from '@chakra-ui/react';
 import { useAuth } from '../hooks/useAuth';
 import { memberService } from '../services/memberService';
 import { committeeService } from '../services/committeeService';
 import { bidService } from '../services/bidService';
+import { IndianRupee, Calendar, User } from 'lucide-react';
 
 interface DashboardStats {
   totalCommittees: number;
@@ -11,7 +12,13 @@ interface DashboardStats {
   totalBids: number;
   recentActivity: Array<{
     id: string;
-    message: string;
+    type: 'bid' | 'committee' | 'member';
+    title: string;
+    description: string;
+    amount?: number;
+    monthlyShare?: number;
+    committeeName?: string;
+    bidderName?: string;
     timestamp: string;
   }>;
 }
@@ -83,37 +90,60 @@ const Dashboard: React.FC = () => {
         totalMembersCount = memberCounts.reduce((sum, count) => sum + count, 0);
 
         // Generate recent activity from committees and bids
-        const recentActivity: Array<{ id: string; message: string; timestamp: string; date: Date }> = [];
+        const recentActivity: Array<{
+          id: string;
+          type: 'bid' | 'committee' | 'member';
+          title: string;
+          description: string;
+          amount?: number;
+          monthlyShare?: number;
+          committeeName?: string;
+          bidderName?: string;
+          timestamp: string;
+          date: Date;
+        }> = [];
         
         // Add committee activities
         committeesData.forEach((committee) => {
           if (committee.createdTimestamp) {
             recentActivity.push({
               id: `committee-${committee.comitteId}`,
-              message: `Committee "${committee.comitteName || 'Unnamed'}" created`,
+              type: 'committee',
+              title: 'Committee Created',
+              description: `New committee "${committee.comitteName || 'Unnamed'}" was created`,
+              committeeName: committee.comitteName || 'Unnamed',
               timestamp: committee.createdTimestamp,
               date: new Date(committee.createdTimestamp)
             });
           }
         });
 
-        // Add bid activities
+        // Add bid activities with detailed information
         bidsData.forEach((bid) => {
           if (bid.createdTimestamp) {
             const bidder = bid.finalBidderName || 'Unknown bidder';
             const committee = bid.comitteName || `Committee #${bid.comitteId}`;
+            const amount = bid.finalBidAmt || 0;
+            const monthlyShare = bid.monthlyShare || 0;
+            
             recentActivity.push({
               id: `bid-${bid.bidId}`,
-              message: `Bid submitted by ${bidder} for ${committee}`,
+              type: 'bid',
+              title: 'Bid Submitted',
+              description: `${bidder} has picked this comitte at loss of ${amount}`,
+              amount: amount,
+              monthlyShare: monthlyShare,
+              committeeName: committee,
+              bidderName: bidder,
               timestamp: bid.createdTimestamp,
               date: new Date(bid.createdTimestamp)
             });
           }
         });
 
-        // Sort by date and take the 3 most recent
+        // Sort by date and take the 5 most recent
         recentActivity.sort((a, b) => b.date.getTime() - a.date.getTime());
-        const recentActivities = recentActivity.slice(0, 3).map(({ date, ...activity }) => activity);
+        const recentActivities = recentActivity.slice(0, 5).map(({ date, ...activity }) => activity);
 
         setStats({
           totalCommittees: committeesData.length,
@@ -146,6 +176,15 @@ const Dashboard: React.FC = () => {
     } else {
       return 'Just now';
     }
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
   };
 
   return (
@@ -186,30 +225,57 @@ const Dashboard: React.FC = () => {
               </Box>
 
               <Box bg="gray.900" borderColor="gray.800" borderWidth="1px" rounded="lg" p={{ base: 4, sm: 5 }} gridColumn={{ base: 'auto', sm: 'span 2', lg: 'auto' }}>
-                <Text color="white" fontWeight="semibold" fontSize={{ base: 'md', sm: 'lg' }} mb={2}>Total Bids</Text>
+                <Text color="white" fontWeight="semibold" fontSize={{ base: 'md', sm: 'lg' }} mb={2}>Recent Bids</Text>
                 <Text color="green.400" fontWeight="bold" fontSize={{ base: '2xl', sm: '3xl' }}>{stats.totalBids}</Text>
-                <Text color="gray.400" fontSize={{ base: 'xs', sm: 'sm' }}>Your bid history</Text>
+                <Text color="gray.400" fontSize={{ base: 'xs', sm: 'sm' }}>Total bid submissions</Text>
               </Box>
             </SimpleGrid>
 
             <Box bg="gray.900" borderColor="gray.800" borderWidth="1px" rounded="lg">
               <Box px={{ base: 4, sm: 5 }} py={{ base: 3, sm: 4 }} borderBottomWidth="1px" borderColor="gray.800">
-                <Text color="white" fontWeight="semibold" fontSize={{ base: 'lg', sm: 'xl' }}>Recent Activity</Text>
+                <Text color="white" fontWeight="semibold" fontSize={{ base: 'lg', sm: 'xl' }}>Recent Bid Activity</Text>
+                <Text color="gray.400" fontSize="sm" mt={1}>Latest bids from all your committees</Text>
               </Box>
               <Box px={{ base: 4, sm: 5 }} py={{ base: 3, sm: 4 }}>
                 {stats.recentActivity.length > 0 ? (
                   <Stack gap={3}>
                     {stats.recentActivity.map((activity) => (
-                      <Box key={activity.id} display="flex" alignItems="center" justifyContent="space-between" p={3} bg="gray.800" rounded="md">
-                        <Box>
-                          <Text color="white" fontSize={{ base: 'sm', sm: 'md' }}>{activity.message}</Text>
-                          <Text color="gray.400" fontSize={{ base: 'xs', sm: 'sm' }}>{formatRelativeTime(activity.timestamp)}</Text>
+                      <Box key={activity.id} bg="gray.800" rounded="lg" p={4} borderLeft="4px solid" borderColor={activity.type === 'bid' ? 'green.500' : 'blue.500'}>
+                        <Box display="flex" alignItems="start" justifyContent="between" gap={3}>
+                          <Box flex="1">
+                            <Box display="flex" alignItems="center" gap={2} mb={3}>
+                              <Box p={1} bg={activity.type === 'bid' ? 'green.600' : 'blue.600'} rounded="md">
+                                <IndianRupee size={14} color="white" />
+                              </Box>
+                              <Text color="blue.400" fontSize="sm" fontWeight="bold">
+                                {activity.committeeName}
+                              </Text>
+                            </Box>
+                            
+                            <Text color="white" fontSize={{ base: 'sm', sm: 'md' }} mb={3} lineHeight="1.5">
+                              <Text as="span" color="green.400" fontWeight="bold">{activity.bidderName}</Text>
+                              <Text as="span"> has picked this comitte at loss of </Text>
+                              <Text as="span" color="red.400" fontWeight="bold">₹{formatCurrency(activity.amount || 0)}</Text>
+                            </Text>
+                            
+                            <Box display="flex" alignItems="center" justifyContent="flex-end" gap={2}>
+                              <Box display="flex" alignItems="center" gap={1}>
+                                <Calendar size={12} color="#9ca3af" />
+                                <Text color="gray.400" fontSize="xs">
+                                  {formatRelativeTime(activity.timestamp)}
+                                </Text>
+                              </Box>
+                            </Box>
+                          </Box>
                         </Box>
                       </Box>
                     ))}
                   </Stack>
                 ) : (
-                  <Text color="gray.500" fontSize="sm">No recent activity</Text>
+                  <Box textAlign="center" py={8}>
+                    <Text color="gray.500" fontSize="sm" mb={2}>No recent bid activity</Text>
+                    <Text color="gray.600" fontSize="xs">Bid activity from your committees will appear here</Text>
+                  </Box>
                 )}
               </Box>
             </Box>

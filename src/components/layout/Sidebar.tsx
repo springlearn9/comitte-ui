@@ -6,7 +6,8 @@ import {
   LogOut, 
   Briefcase,
   BarChart3,
-  Grid3X3
+  Grid3X3,
+  User
 } from 'lucide-react';
 import { Box, Text } from '@chakra-ui/react';
 import { useAuth } from '../../hooks/useAuth';
@@ -31,6 +32,11 @@ const Sidebar: React.FC = () => {
       icon: <FileText className="w-5 h-5" />,
       label: 'Bids',
       path: '/bids',
+    },
+    {
+      icon: <User className="w-5 h-5" />,
+      label: 'Profile Settings',
+      path: '/profile',
     },
     {
       icon: <BarChart3 className="w-5 h-5" />,

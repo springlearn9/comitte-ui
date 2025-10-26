@@ -10,6 +10,7 @@ import { SignIn, SignUp, ForgotPassword, UserRegistration } from './pages/auth';
 import About from './pages/About';
 import Feedback from './pages/Feedback';
 import AppGallery from './pages/AppGallery';
+import UserProfile from './pages/UserProfile';
 import Sidebar from './components/layout/Sidebar';
 import Header from './components/layout/Header';
 
@@ -105,6 +106,14 @@ const AppContent: React.FC = () => {
         element={
           <ProtectedRoute>
             <AppGallery />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <UserProfile />
           </ProtectedRoute>
         }
       />
