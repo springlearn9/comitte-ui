@@ -247,12 +247,12 @@ const Dashboard: React.FC = () => {
                 {stats.recentActivity.length > 0 ? (
                   <Stack gap={3}>
                     {stats.recentActivity.map((activity) => (
-                      <Box key={activity.id} bg="gray.800" rounded="lg" p={4} borderLeft="4px solid" borderColor={activity.type === 'bid' ? 'green.500' : 'blue.500'}>
+                      <Box key={activity.id} bg="gray.800" rounded="lg" p={4} borderLeft="4px solid" borderColor="green.500">
                         <Box display="flex" alignItems="start" justifyContent="between" gap={3}>
                           <Box flex="1">
                             <Box display="flex" alignItems="center" justifyContent="space-between" mb={3}>
                               <Box display="flex" alignItems="center" gap={2}>
-                                <Text color="blue.400" fontSize="sm" fontWeight="bold">
+                                <Text color="green.400" fontSize="sm" fontWeight="bold">
                                   {activity.committeeName}
                                 </Text>
                               </Box>
@@ -264,9 +264,9 @@ const Dashboard: React.FC = () => {
                             </Box>
                             
                             <Text color="white" fontSize={{ base: 'sm', sm: 'md' }} mb={3} lineHeight="1.5">
-                              <Text as="span" color="green.400" fontWeight="bold">{activity.bidderName}</Text>
+                              <Text as="span" color="blue.400" fontWeight="bold">{activity.bidderName}</Text>
                               <Text as="span"> picked it at a loss of </Text>
-                              <Text as="span" color="red.400" fontWeight="bold">{formatCurrency(activity.amount || 0)}</Text>
+                              <Text as="span" color="blue.400" fontWeight="bold">{formatCurrency(activity.amount || 0)}</Text>
                             </Text>
                             
                             {activity.monthlyShare && (
@@ -274,8 +274,8 @@ const Dashboard: React.FC = () => {
                                 <Box display="flex" alignItems="center" gap={2}>
                                   <Text color="gray.400" fontSize="xs">Monthly Share</Text>
                                   <Box display="flex" alignItems="center" gap={1}>
-                                    <IndianRupee size={14} color="#3b82f6" />
-                                    <Text color="blue.400" fontSize="md" fontWeight="bold">
+                                    <IndianRupee size={14} color="#ef4444" />
+                                    <Text color="red.400" fontSize="md" fontWeight="bold">
                                       {formatCurrency(activity.monthlyShare)}
                                     </Text>
                                   </Box>
