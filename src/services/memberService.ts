@@ -24,6 +24,27 @@ class MemberService {
     return data;
   }
 
+  // GET /api/members/{id}
+  async getMemberById(memberId: number): Promise<MemberResponse> {
+    const { data } = await this.api.get<MemberResponse>(`/members/${memberId}`);
+    return data;
+  }
+
+  // PUT /api/members/{id}
+  async updateMember(memberId: number, memberData: {
+    username?: string;
+    email?: string;
+    name?: string;
+    mobile?: string;
+    aadharNo?: string;
+    password?: string;
+    address?: string;
+    dob?: string;
+  }): Promise<MemberResponse> {
+    const { data } = await this.api.put<MemberResponse>(`/members/${memberId}`, memberData);
+    return data;
+  }
+
   // GET /api/comittes/{id}/members
   async getByCommittee(comitteId: number): Promise<CommitteMemberMapResponse[]> {
     const { data } = await this.api.get<CommitteMemberMapResponse[]>(`/comittes/${comitteId}/members`);

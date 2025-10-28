@@ -40,6 +40,7 @@ export interface MemberResponse {
   mobile?: string;
   aadharNo?: string;
   address?: string;
+  dob?: string; // Date of birth field
   createdTimestamp: string;
   updatedTimestamp?: string;
 }

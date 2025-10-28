@@ -585,19 +585,59 @@ const Committees: React.FC = () => {
               {!bidsModal.loading && bidsModal.items.length === 0 && (
                 <Text color="gray.500" fontSize="sm">No bids found.</Text>
               )}
-              <Stack gap={2}>
-                {bidsModal.items.map((b) => (
-                  <Box key={b.id} bg="gray.800" rounded="md" px={3} py={2} display="grid" gridTemplateColumns="36px 12px 110px 12px 1fr 12px 120px" alignItems="center">
-                    <Box bg="gray.700" color="gray.100" px={2} py={0.5} rounded="full" fontSize="xs" textAlign="center">{b.committeeNumber ?? '-'}</Box>
-                    <Text color="gray.500" textAlign="center">•</Text>
-                    <Text color="gray.400" fontSize="sm">{(b.bidDate || b.createdAt)?.slice(0,10).split('-').reverse().join('-')}</Text>
-                    <Text color="gray.500" textAlign="center">•</Text>
-                    <Text color="gray.300" fontSize="sm" lineClamp={1}>{b.finalBidderName || '-'}</Text>
-                    <Text color="gray.500" textAlign="center">•</Text>
-                    <Text color="white" fontWeight="semibold" textAlign="right">₹{b.amount}</Text>
+              {!bidsModal.loading && bidsModal.items.length > 0 && (
+                <Stack gap={2}>
+                  {/* Header row */}
+                  <Box
+                    display="grid"
+                    gridTemplateColumns="36px 110px 1fr 120px 120px"
+                    alignItems="center"
+                    gap={3}
+                    px={3}
+                    py={1}
+                    borderBottom="1px solid"
+                    borderColor="gray.700"
+                  >
+                    <Text color="gray.500" fontSize="xs" textAlign="center">#</Text>
+                    <Text color="gray.500" fontSize="xs">Date</Text>
+                    <Text color="gray.500" fontSize="xs">Bidder</Text>
+                    <Text color="gray.500" fontSize="xs" textAlign="right">Bid Amount</Text>
+                    <Text color="gray.500" fontSize="xs" textAlign="right">Monthly Share</Text>
                   </Box>
-                ))}
-              </Stack>
+                  {bidsModal.items.map((b) => (
+                    <Box
+                      key={b.id}
+                      display="grid"
+                      gridTemplateColumns="36px 110px 1fr 120px 120px"
+                      alignItems="center"
+                      gap={3}
+                      bg="gray.800"
+                      rounded="md"
+                      px={3}
+                      py={2}
+                    >
+                      {/* Col 1: committee number pill */}
+                      <Box bg="gray.700" color="gray.100" px={2} py={0.5} rounded="full" fontSize="xs" textAlign="center">
+                        {b.committeeNumber ?? '-'}
+                      </Box>
+                      {/* Col 2: date (ddMonYYYY format) */}
+                      <Text color="gray.400" fontSize="sm">
+                        {formatDate(b.bidDate || b.createdAt)}
+                      </Text>
+                      {/* Col 3: final bidder name */}
+                      <Text color="gray.300" fontSize="sm" lineClamp={1}>
+                        {b.finalBidderName && b.finalBidderName.trim() !== '' ? b.finalBidderName : '-'}
+                      </Text>
+                      {/* Col 4: bid amount right-aligned */}
+                      <Text color="white" fontWeight="semibold" textAlign="right">₹{b.amount}</Text>
+                      {/* Col 5: monthly share right-aligned */}
+                      <Text color="green.400" fontWeight="semibold" textAlign="right">
+                        {b.monthlyShare ? `₹${b.monthlyShare}` : '-'}
+                      </Text>
+                    </Box>
+                  ))}
+                </Stack>
+              )}
             </DialogBody>
             <DialogFooter>
               <Button onClick={() => setBidsModal(prev => ({ ...prev, open: false }))}>Close</Button>

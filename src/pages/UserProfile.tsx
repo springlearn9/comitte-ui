@@ -18,18 +18,21 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
+import { memberService } from '../services/memberService';
 import PasswordChangeModal from '../components/PasswordChangeModal';
 
 interface UserProfileData {
-  id: number;
+  memberId: number;
   username: string;
   email: string;
   name: string;
-  phone: string;
+  mobile: string;
+  aadharNo: string;
   address: string;
+  createdTimestamp: string;
+  updatedTimestamp?: string;
+  // Additional profile fields
   dateOfBirth: string;
-  aadhar: string;
-  bio: string;
   avatar: string;
   // Settings
   emailNotifications: boolean;
@@ -43,15 +46,16 @@ const UserProfile: React.FC = () => {
   const navigate = useNavigate();
   
   const [profileData, setProfileData] = useState<UserProfileData>({
-    id: 0,
+    memberId: 0,
     username: '',
     email: '',
     name: '',
-    phone: '',
+    mobile: '',
+    aadharNo: '',
     address: '',
+    createdTimestamp: '',
+    updatedTimestamp: '',
     dateOfBirth: '',
-    aadhar: '',
-    bio: '',
     avatar: '',
     emailNotifications: true,
     smsNotifications: false,
@@ -60,24 +64,97 @@ const UserProfile: React.FC = () => {
   });
 
   const [isLoading, setIsLoading] = useState(false);
+  const [dataLoading, setDataLoading] = useState(true);
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [activeTab, setActiveTab] = useState<'personal' | 'security' | 'notifications'>('personal');
   const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [effectiveMemberId, setEffectiveMemberId] = useState<number>(0);
 
+  // Resolve member ID similar to other components
   useEffect(() => {
-    // Initialize with current user data
-    if (user) {
-      setProfileData(prev => ({
-        ...prev,
-        id: user.id || 0,
-        username: user.username || '',
-        email: user.email || '',
-        // Note: name field will be empty initially as it's not in the User type
-        name: '',
-      }));
-    }
+    const resolveMemberId = async () => {
+      if (!user) return;
+      const tryParse = (v: any) => {
+        const n = Number(v); 
+        return Number.isFinite(n) && n > 0 ? n : null;
+      };
+      
+      // Try to get memberId from user object
+      const m1 = tryParse((user as any)?.memberId ?? (user as any)?.memberID ?? (user as any)?.member?.id);
+      if (m1) {
+        setEffectiveMemberId(m1);
+        return;
+      }
+      
+      // If not found, search by username
+      try {
+        if (user.username) {
+          const found = await memberService.searchMembers({ username: user.username });
+          if (found?.length) {
+            const m2 = tryParse(found[0].memberId);
+            if (m2) {
+              setEffectiveMemberId(m2);
+              return;
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error searching for member:', error);
+      }
+      
+      // Fallback to user ID
+      const m3 = tryParse(user.id);
+      if (m3) setEffectiveMemberId(m3);
+    };
+    
+    resolveMemberId();
   }, [user]);
+
+  // Load member data once we have the member ID
+  useEffect(() => {
+    const loadMemberData = async () => {
+      if (!effectiveMemberId || effectiveMemberId <= 0) return;
+      
+      setDataLoading(true);
+      setErrorMessage('');
+      
+      try {
+        const memberData = await memberService.getMemberById(effectiveMemberId);
+        
+        setProfileData(prev => ({
+          ...prev,
+          memberId: memberData.memberId,
+          username: memberData.username,
+          email: memberData.email,
+          name: memberData.name || '',
+          mobile: memberData.mobile || '',
+          aadharNo: memberData.aadharNo || '',
+          address: memberData.address || '',
+          dateOfBirth: memberData.dob || '', // Map dob from API to dateOfBirth
+          createdTimestamp: memberData.createdTimestamp,
+          updatedTimestamp: memberData.updatedTimestamp,
+        }));
+      } catch (error: any) {
+        console.error('Error loading member data:', error);
+        setErrorMessage('Failed to load profile data. Please try again.');
+        
+        // Fallback to user data if API fails
+        if (user) {
+          setProfileData(prev => ({
+            ...prev,
+            memberId: effectiveMemberId,
+            username: user.username || '',
+            email: user.email || '',
+          }));
+        }
+      } finally {
+        setDataLoading(false);
+      }
+    };
+    
+    loadMemberData();
+  }, [effectiveMemberId, user]);
 
   const handleInputChange = (field: keyof UserProfileData, value: string | boolean) => {
     setProfileData(prev => ({
@@ -87,20 +164,51 @@ const UserProfile: React.FC = () => {
   };
 
   const handleSave = async () => {
+    if (!effectiveMemberId || effectiveMemberId <= 0) {
+      setErrorMessage('Invalid member ID. Cannot save profile.');
+      setTimeout(() => setErrorMessage(''), 3000);
+      return;
+    }
+
     setIsLoading(true);
     setSuccessMessage('');
     setErrorMessage('');
 
     try {
-      // Simulate API call - replace with actual API integration
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Prepare data for API call
+      const updateData = {
+        username: profileData.username,
+        email: profileData.email,
+        name: profileData.name,
+        mobile: profileData.mobile,
+        aadharNo: profileData.aadharNo,
+        address: profileData.address,
+        dob: profileData.dateOfBirth, // Map dateOfBirth to dob for API
+      };
+
+      // Call the API to update member data
+      const updatedMember = await memberService.updateMember(effectiveMemberId, updateData);
+      
+      // Update the local state with the response data
+      setProfileData(prev => ({
+        ...prev,
+        username: updatedMember.username,
+        email: updatedMember.email,
+        name: updatedMember.name || '',
+        mobile: updatedMember.mobile || '',
+        aadharNo: updatedMember.aadharNo || '',
+        address: updatedMember.address || '',
+        updatedTimestamp: updatedMember.updatedTimestamp,
+      }));
       
       setSuccessMessage('Profile updated successfully!');
       
       // Clear message after 3 seconds
       setTimeout(() => setSuccessMessage(''), 3000);
-    } catch (error) {
-      setErrorMessage('Failed to update profile. Please try again.');
+    } catch (error: any) {
+      console.error('Error updating profile:', error);
+      const errorMsg = error?.response?.data?.message || error?.message || 'Failed to update profile. Please try again.';
+      setErrorMessage(errorMsg);
       setTimeout(() => setErrorMessage(''), 3000);
     } finally {
       setIsLoading(false);
@@ -160,59 +268,70 @@ const UserProfile: React.FC = () => {
         </Box>
       )}
 
-      <Box display="grid" gridTemplateColumns={{ base: '1fr', lg: '300px 1fr' }} gap={6}>
-        {/* Navigation Tabs */}
-        <Box>
-          <Stack gap={2}>
-            <Button
-              variant={activeTab === 'personal' ? 'solid' : 'ghost'}
-              justifyContent="flex-start"
-              bg={activeTab === 'personal' ? 'gray.700' : 'transparent'}
-              color={activeTab === 'personal' ? 'white' : 'gray.400'}
-              _hover={{ bg: 'gray.800', color: 'white' }}
-              onClick={() => setActiveTab('personal')}
-              size="md"
-            >
-              <Box display="flex" alignItems="center" gap={3}>
-                <User size={18} />
-                Personal Information
-              </Box>
-            </Button>
-            
-            <Button
-              variant={activeTab === 'security' ? 'solid' : 'ghost'}
-              justifyContent="flex-start"
-              bg={activeTab === 'security' ? 'gray.700' : 'transparent'}
-              color={activeTab === 'security' ? 'white' : 'gray.400'}
-              _hover={{ bg: 'gray.800', color: 'white' }}
-              onClick={() => setActiveTab('security')}
-              size="md"
-            >
-              <Box display="flex" alignItems="center" gap={3}>
-                <Shield size={18} />
-                Security
-              </Box>
-            </Button>
-            
-            <Button
-              variant={activeTab === 'notifications' ? 'solid' : 'ghost'}
-              justifyContent="flex-start"
-              bg={activeTab === 'notifications' ? 'gray.700' : 'transparent'}
-              color={activeTab === 'notifications' ? 'white' : 'gray.400'}
-              _hover={{ bg: 'gray.800', color: 'white' }}
-              onClick={() => setActiveTab('notifications')}
-              size="md"
-            >
-              <Box display="flex" alignItems="center" gap={3}>
-                <Bell size={18} />
-                Notifications
-              </Box>
-            </Button>
-          </Stack>
+      {/* Loading State */}
+      {dataLoading && (
+        <Box bg="gray.900" borderColor="gray.800" borderWidth="1px" rounded="lg" p={8} textAlign="center">
+          <Text color="gray.400">Loading profile data...</Text>
         </Box>
+      )}
 
-        {/* Content Area */}
+      {!dataLoading && (
         <Box>
+          {/* Horizontal Navigation Tabs */}
+          <Box mb={6}>
+            <Box display="flex" gap={2} borderBottom="1px solid" borderColor="gray.800" pb={4}>
+              <Button
+                variant={activeTab === 'personal' ? 'solid' : 'ghost'}
+                bg={activeTab === 'personal' ? 'blue.600' : 'transparent'}
+                color={activeTab === 'personal' ? 'white' : 'gray.400'}
+                _hover={{ bg: activeTab === 'personal' ? 'blue.700' : 'gray.800', color: 'white' }}
+                onClick={() => setActiveTab('personal')}
+                size={{ base: 'sm', md: 'md' }}
+                borderRadius="md"
+                title="Personal Information"
+              >
+                <Box display="flex" alignItems="center" gap={2}>
+                  <User size={16} />
+                  <Text display={{ base: 'none', md: 'block' }}>Personal Information</Text>
+                </Box>
+              </Button>
+              
+              <Button
+                variant={activeTab === 'security' ? 'solid' : 'ghost'}
+                bg={activeTab === 'security' ? 'blue.600' : 'transparent'}
+                color={activeTab === 'security' ? 'white' : 'gray.400'}
+                _hover={{ bg: activeTab === 'security' ? 'blue.700' : 'gray.800', color: 'white' }}
+                onClick={() => setActiveTab('security')}
+                size={{ base: 'sm', md: 'md' }}
+                borderRadius="md"
+                title="Security"
+              >
+                <Box display="flex" alignItems="center" gap={2}>
+                  <Shield size={16} />
+                  <Text display={{ base: 'none', md: 'block' }}>Security</Text>
+                </Box>
+              </Button>
+              
+              <Button
+                variant={activeTab === 'notifications' ? 'solid' : 'ghost'}
+                bg={activeTab === 'notifications' ? 'blue.600' : 'transparent'}
+                color={activeTab === 'notifications' ? 'white' : 'gray.400'}
+                _hover={{ bg: activeTab === 'notifications' ? 'blue.700' : 'gray.800', color: 'white' }}
+                onClick={() => setActiveTab('notifications')}
+                size={{ base: 'sm', md: 'md' }}
+                borderRadius="md"
+                title="Notifications"
+              >
+                <Box display="flex" alignItems="center" gap={2}>
+                  <Bell size={16} />
+                  <Text display={{ base: 'none', md: 'block' }}>Notifications</Text>
+                </Box>
+              </Button>
+            </Box>
+          </Box>
+
+          {/* Content Area */}
+          <Box>
           {/* Personal Information Tab */}
           {activeTab === 'personal' && (
             <Box bg="gray.900" borderColor="gray.800" borderWidth="1px" rounded="lg" p={6}>
@@ -319,8 +438,8 @@ const UserProfile: React.FC = () => {
                     </Text>
                     <Input
                       placeholder="Enter phone number"
-                      value={profileData.phone}
-                      onChange={(e) => handleInputChange('phone', e.target.value)}
+                      value={profileData.mobile}
+                      onChange={(e) => handleInputChange('mobile', e.target.value)}
                       bg="gray.800"
                       borderColor="gray.700"
                       color="white"
@@ -352,8 +471,8 @@ const UserProfile: React.FC = () => {
                     </Text>
                     <Input
                       placeholder="Enter 12-digit Aadhar number"
-                      value={profileData.aadhar}
-                      onChange={(e) => handleInputChange('aadhar', e.target.value)}
+                      value={profileData.aadharNo}
+                      onChange={(e) => handleInputChange('aadharNo', e.target.value)}
                       bg="gray.800"
                       borderColor="gray.700"
                       color="white"
@@ -368,7 +487,7 @@ const UserProfile: React.FC = () => {
                   <Text color="white" fontSize="sm" fontWeight="medium" mb={2}>
                     Address
                   </Text>
-                  <Input
+                  <Textarea
                     placeholder="Enter your address"
                     value={profileData.address}
                     onChange={(e) => handleInputChange('address', e.target.value)}
@@ -377,23 +496,7 @@ const UserProfile: React.FC = () => {
                     color="white"
                     _placeholder={{ color: 'gray.500' }}
                     _focus={{ borderColor: 'blue.400' }}
-                  />
-                </Box>
-
-                <Box>
-                  <Text color="white" fontSize="sm" fontWeight="medium" mb={2}>
-                    Bio
-                  </Text>
-                  <Textarea
-                    placeholder="Tell us about yourself..."
-                    value={profileData.bio}
-                    onChange={(e) => handleInputChange('bio', e.target.value)}
-                    bg="gray.800"
-                    borderColor="gray.700"
-                    color="white"
-                    _placeholder={{ color: 'gray.500' }}
-                    _focus={{ borderColor: 'blue.400' }}
-                    rows={4}
+                    rows={3}
                   />
                 </Box>
               </Stack>
@@ -609,7 +712,8 @@ const UserProfile: React.FC = () => {
             </Button>
           </Box>
         </Box>
-      </Box>
+        </Box>
+      )}
 
       {/* Password Change Modal */}
       <PasswordChangeModal
