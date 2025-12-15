@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Stack, Heading, Text, SimpleGrid, Badge } from '@chakra-ui/react';
+import { Box, Stack, Heading, Text, SimpleGrid, Badge, Spinner } from '@chakra-ui/react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { memberService } from '../services/memberService';
@@ -294,7 +294,10 @@ const Dashboard: React.FC = () => {
         </Box>
 
         {loading && (
-          <Text color="gray.400">Loading dashboard data...</Text>
+          <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" py={12} gap={4}>
+            <Spinner size="xl" color="red.500" thickness="4px" speed="0.65s" />
+            <Text color="gray.400" fontSize="lg">Loading dashboard data...</Text>
+          </Box>
         )}
 
         {error && (

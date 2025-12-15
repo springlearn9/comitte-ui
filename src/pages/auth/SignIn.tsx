@@ -19,12 +19,10 @@ const SignIn: React.FC = () => {
     
     try {
       await login(username, password);
-      alert('Login successful! Welcome to Comitte Management System.');
       navigate('/dashboard');
     } catch (err: any) {
       const errorMessage = err.message || 'Login failed. Please check your credentials.';
       setError(errorMessage);
-      alert(errorMessage);
     } finally {
       setIsLoading(false);
     }
