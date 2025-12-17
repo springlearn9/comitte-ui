@@ -395,45 +395,11 @@ const Committees: React.FC = () => {
           setActiveTab('my-committees')
         }
       >
-        <Tabs.List
-          mb={4}
-          borderBottomWidth="0"
-          gap={6}
-          position="relative"
-        >
-          <Tabs.Trigger
-            value="my-committees"
-            px={3}
-            py={2}
-            roundedTop="md"
-            bg="transparent"
-            fontWeight="semibold"
-            color="gray.400"
-            borderWidth="1px"
-            borderColor="transparent"
-            borderBottomColor="transparent"
-            _hover={{ color: 'gray.300' }}
-            css={{
-              '&[data-selected]': {
-                color: 'white',
-                borderColor: 'var(--chakra-colors-gray-700)',
-                borderBottomColor: 'transparent',
-              },
-            }}
-          >
-            My Committees
-          </Tabs.Trigger>
-          {/* No indicator; active tab overlaps bottom border for enclosed style */}
-        </Tabs.List>
-
         {loading && <Text color="gray.400">Loading committees...</Text>}
         {error && <Text color="red.400">{error}</Text>}
 
         <Tabs.Content value="my-committees" paddingX={0}>
-          <Box display="flex" alignItems="center" justifyContent="space-between" mb={4}>
-            <Text color="gray.400">
-              All your committees ({myCommittees.length} committees)
-            </Text>
+          <Box display="flex" alignItems="center" justifyContent="flex-end" mb={4}>
             <Button 
               colorPalette="gray" 
               variant="outline" 
