@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Stack, Heading, Text, SimpleGrid, Badge, Spinner } from '@chakra-ui/react';
+import { Box, Stack, Heading, Text, SimpleGrid, Badge, Spinner, DialogRoot, DialogBackdrop, DialogPositioner, DialogContent, DialogHeader, DialogBody, DialogFooter, DialogTitle } from '@chakra-ui/react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { memberService } from '../services/memberService';
 import { committeeService } from '../services/committeeService';
 import { bidService } from '../services/bidService';
 import { IndianRupee, Calendar, User, Users, Building, FileText, TrendingUp } from 'lucide-react';
+import type { CommitteMemberMapResponse } from '../services/authService';
+import { mapBidResponse, type Bid } from '../types/bid';
 
 interface DashboardStats {
   totalCommittees: number;
@@ -27,9 +29,13 @@ interface DashboardStats {
     id: number;
     name: string;
     totalAmount: number;
+    monthlyShare?: number;
+    fullShare?: number;
     membersCount: number;
     status: string;
     createdDate: string;
+    startDate: string;
+    bidsRatio?: string;
   }>;
 }
 
@@ -44,6 +50,10 @@ const Dashboard: React.FC = () => {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Modal states
+  const [membersModal, setMembersModal] = useState<{ open: boolean; title: string; loading: boolean; items: CommitteMemberMapResponse[] }>({ open: false, title: '', loading: false, items: []});
+  const [bidsModal, setBidsModal] = useState<{ open: boolean; title: string; loading: boolean; items: Bid[] }>({ open: false, title: '', loading: false, items: []});
 
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -166,10 +176,14 @@ const Dashboard: React.FC = () => {
         const myCommittees = myCommitteesData.slice(0, 5).map(committee => ({
           id: committee.comitteId,
           name: committee.comitteName || 'Unnamed Committee',
-          totalAmount: committee.totalAmount || 0,
+          totalAmount: committee.fullAmount || 0,
+          monthlyShare: committee.fullShare || undefined,
+          fullShare: committee.fullShare || undefined,
           membersCount: memberCounts[myCommitteesData.indexOf(committee)] || 0,
           status: 'ACTIVE',
-          createdDate: committee.createdTimestamp || new Date().toISOString()
+          createdDate: committee.createdTimestamp || new Date().toISOString(),
+          startDate: committee.startDate || committee.createdTimestamp || new Date().toISOString(),
+          bidsRatio: committee.bidsRatio ? String(committee.bidsRatio) : undefined
         }));
 
         setStats({
@@ -189,6 +203,37 @@ const Dashboard: React.FC = () => {
 
     loadDashboardData();
   }, [user]);
+
+  const openMembers = async (committeeId: number, committeeName: string) => {
+    setMembersModal({ open: true, title: `${committeeName} • Members`, loading: true, items: [] });
+    try {
+      const data = await memberService.getByCommittee(committeeId);
+      setMembersModal({ open: true, title: `${committeeName} • Members`, loading: false, items: data });
+    } catch (e) {
+      setMembersModal({ open: true, title: `${committeeName} • Members`, loading: false, items: [] });
+    }
+  };
+
+  const openBids = async (committeeId: number, committeeName: string) => {
+    setBidsModal({ open: true, title: `${committeeName} • Bids`, loading: true, items: [] });
+    try {
+      const data = await bidService.getByCommittee(committeeId);
+      setBidsModal({ open: true, title: `${committeeName} • Bids`, loading: false, items: data.map(mapBidResponse) });
+    } catch (e) {
+      setBidsModal({ open: true, title: `${committeeName} • Bids`, loading: false, items: [] });
+    }
+  };
+
+  const formatDate = (iso?: string) => {
+    if (!iso) return '';
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return iso;
+    const dd = String(d.getDate()).padStart(2, '0');
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const mm = months[d.getMonth()];
+    const yy = String(d.getFullYear()).slice(-2);
+    return `${dd}${mm}${yy}`;
+  };
 
   const formatRelativeTime = (timestamp: string) => {
     const date = new Date(timestamp);
@@ -365,19 +410,85 @@ const Dashboard: React.FC = () => {
                     <Stack gap={2}>
                       {stats.myCommittees.slice(0, 3).map((committee) => (
                         <Box key={committee.id} p={2} bg="gray.800" rounded="md" borderLeft="3px solid" borderColor="blue.400">
-                          <Box display="flex" alignItems="center" justifyContent="space-between" mb={1}>
-                            <Text color="white" fontSize="xs" fontWeight="medium">
-                              {committee.name}
-                            </Text>
-                            <Badge colorScheme="blue" fontSize="2xs">ACTIVE</Badge>
+                          <Box display="grid" gridTemplateColumns="2fr 1fr 1fr" gap={3} mb={1.5}>
+                            {/* Row 1 Column 1: Committee Name + Bids Ratio */}
+                            <Box display="flex" alignItems="center" gap={2}>
+                              <Text color="white" fontSize="xs" fontWeight="medium">
+                                {committee.name}
+                              </Text>
+                              {committee.bidsRatio && (
+                                <Box bg="gray.700" color="gray.100" px={1.5} py={0.5} rounded="full" fontSize="2xs">
+                                  {committee.bidsRatio}
+                                </Box>
+                              )}
+                            </Box>
+                            {/* Row 1 Column 2: Full Share */}
+                            <Box display="flex" alignItems="center">
+                              <Text color="green.400" fontSize="2xs" fontWeight="medium">
+                                {committee.fullShare ? `₹${committee.fullShare}` : 'N/A'}
+                              </Text>
+                            </Box>
+                            {/* Row 1 Column 3: Full Amount */}
+                            <Box display="flex" alignItems="center" justifyContent="flex-start">
+                              <Text color="white" fontSize="xs" fontWeight="medium">
+                                {formatCurrency(committee.totalAmount)}
+                              </Text>
+                            </Box>
                           </Box>
-                          <Box display="flex" alignItems="center" justifyContent="space-between">
-                            <Text color="gray.400" fontSize="2xs">
-                              {committee.membersCount} members
-                            </Text>
-                            <Text color="green.400" fontSize="2xs" fontWeight="medium">
-                              {formatCurrency(committee.totalAmount)}
-                            </Text>
+                          <Box display="grid" gridTemplateColumns="2fr 1fr 1fr" gap={3}>
+                            {/* Row 2 Column 1: Start Date */}
+                            <Box>
+                              <Text color="gray.500" fontSize="2xs" mb={0.5}>Start Date</Text>
+                              <Text color="gray.300" fontSize="2xs">{formatDate(committee.startDate)}</Text>
+                            </Box>
+                            {/* Row 2 Column 2: Members Link */}
+                            <Box>
+                              <Text color="gray.500" fontSize="2xs" mb={0.5}>Members</Text>
+                              <Box 
+                                as="button" 
+                                onClick={() => openMembers(committee.id, committee.name)} 
+                                title="View Members"
+                                display="flex"
+                                alignItems="center"
+                                gap={1}
+                                color="blue.300" 
+                                _hover={{ color: 'blue.200', bg: 'gray.700' }} 
+                                px={1.5}
+                                py={0.5}
+                                cursor="pointer" 
+                                borderRadius="md"
+                                transition="all 0.2s"
+                              >
+                                <Text fontSize="2xs" fontWeight="semibold">
+                                  {committee.membersCount}
+                                </Text>
+                                <Users size={12} />
+                              </Box>
+                            </Box>
+                            {/* Row 2 Column 3: Bids Link */}
+                            <Box>
+                              <Text color="gray.500" fontSize="2xs" mb={0.5}>Bids</Text>
+                              <Box 
+                                as="button" 
+                                onClick={() => openBids(committee.id, committee.name)} 
+                                title="View Bids"
+                                display="flex"
+                                alignItems="center"
+                                gap={1}
+                                color="blue.300" 
+                                _hover={{ color: 'blue.200', bg: 'gray.700' }} 
+                                px={1.5}
+                                py={0.5}
+                                cursor="pointer" 
+                                borderRadius="md"
+                                transition="all 0.2s"
+                              >
+                                <Text fontSize="2xs" fontWeight="semibold">
+                                  {committee.bidsRatio || '0'}
+                                </Text>
+                                <IndianRupee size={12} />
+                              </Box>
+                            </Box>
                           </Box>
                         </Box>
                       ))}
@@ -438,6 +549,110 @@ const Dashboard: React.FC = () => {
           </>
         )}
       </Stack>
+
+      {/* Members Modal */}
+      <DialogRoot open={membersModal.open} onOpenChange={(d) => !d.open && setMembersModal(prev => ({ ...prev, open: false }))}>
+        <DialogBackdrop bg="blackAlpha.700" backdropFilter="auto" backdropBlur="2px" />
+        <DialogPositioner inset="0" display="flex" alignItems="center" justifyContent="center" p={{ base: 4, sm: 6 }}>
+          <DialogContent bg="gray.900" color="white" maxW="lg" maxH="80dvh" overflowY="auto" borderColor="gray.700" borderWidth="1px" rounded="md">
+            <DialogHeader>
+              <DialogTitle><Text fontWeight="bold">{membersModal.title}</Text></DialogTitle>
+            </DialogHeader>
+            <DialogBody>
+              {membersModal.loading && <Text color="gray.400">Loading members…</Text>}
+              {!membersModal.loading && membersModal.items.length === 0 && (
+                <Text color="gray.500" fontSize="sm">No members found.</Text>
+              )}
+              <Stack gap={2}>
+                {membersModal.items.map((m) => (
+                  <Box key={m.id} bg="gray.800" rounded="md" px={3} py={2} display="grid" gridTemplateColumns="1fr auto auto" gap={4} alignItems="center">
+                    <Text color="white" fontSize="sm">{m.memberName}</Text>
+                    <Text color="gray.400" fontSize="sm">{m.memberMobile}</Text>
+                    <Text color="gray.400" fontSize="sm">{m.shareCount}</Text>
+                  </Box>
+                ))}
+              </Stack>
+            </DialogBody>
+            <DialogFooter>
+              <Box as="button" onClick={() => setMembersModal(prev => ({ ...prev, open: false }))} px={4} py={2} bg="gray.700" rounded="md" color="white" _hover={{ bg: 'gray.600' }}>Close</Box>
+            </DialogFooter>
+          </DialogContent>
+        </DialogPositioner>
+      </DialogRoot>
+
+      {/* Bids Modal */}
+      <DialogRoot open={bidsModal.open} onOpenChange={(d) => !d.open && setBidsModal(prev => ({ ...prev, open: false }))}>
+        <DialogBackdrop bg="blackAlpha.700" backdropFilter="auto" backdropBlur="2px" />
+        <DialogPositioner inset="0" display="flex" alignItems="center" justifyContent="center" p={{ base: 4, sm: 6 }}>
+          <DialogContent bg="gray.900" color="white" maxW="2xl" maxH="80dvh" overflowY="auto" borderColor="gray.700" borderWidth="1px" rounded="md">
+            <DialogHeader>
+              <DialogTitle><Text fontWeight="bold">{bidsModal.title}</Text></DialogTitle>
+            </DialogHeader>
+            <DialogBody>
+              {bidsModal.loading && <Text color="gray.400">Loading bids…</Text>}
+              {!bidsModal.loading && bidsModal.items.length === 0 && (
+                <Text color="gray.500" fontSize="sm">No bids found.</Text>
+              )}
+              {!bidsModal.loading && bidsModal.items.length > 0 && (
+                <Stack gap={2}>
+                  {/* Header row */}
+                  <Box
+                    display="grid"
+                    gridTemplateColumns="36px 110px 1fr 120px 120px"
+                    alignItems="center"
+                    gap={3}
+                    px={3}
+                    py={1}
+                    borderBottom="1px solid"
+                    borderColor="gray.700"
+                  >
+                    <Text color="gray.500" fontSize="xs" textAlign="center">#</Text>
+                    <Text color="gray.500" fontSize="xs">Date</Text>
+                    <Text color="gray.500" fontSize="xs">Bidder</Text>
+                    <Text color="gray.500" fontSize="xs" textAlign="right">Bid Amount</Text>
+                    <Text color="gray.500" fontSize="xs" textAlign="right">Monthly Share</Text>
+                  </Box>
+                  {bidsModal.items.map((b) => (
+                    <Box
+                      key={b.id}
+                      display="grid"
+                      gridTemplateColumns="36px 110px 1fr 120px 120px"
+                      alignItems="center"
+                      gap={3}
+                      bg="gray.800"
+                      rounded="md"
+                      px={3}
+                      py={2}
+                    >
+                      {/* Col 1: committee number pill */}
+                      <Box bg="gray.700" color="gray.100" px={2} py={0.5} rounded="full" fontSize="xs" textAlign="center">
+                        {b.committeeNumber ?? '-'}
+                      </Box>
+                      {/* Col 2: date (ddMonYYYY format) */}
+                      <Text color="gray.400" fontSize="sm">
+                        {formatDate(b.bidDate || b.createdAt)}
+                      </Text>
+                      {/* Col 3: final bidder name */}
+                      <Text color="gray.300" fontSize="sm" lineClamp={1}>
+                        {b.finalBidderName && b.finalBidderName.trim() !== '' ? b.finalBidderName : '-'}
+                      </Text>
+                      {/* Col 4: bid amount right-aligned */}
+                      <Text color="white" fontWeight="semibold" textAlign="right">₹{b.amount}</Text>
+                      {/* Col 5: monthly share right-aligned */}
+                      <Text color="green.400" fontWeight="semibold" textAlign="right">
+                        {b.monthlyShare ? `₹${b.monthlyShare}` : '-'}
+                      </Text>
+                    </Box>
+                  ))}
+                </Stack>
+              )}
+            </DialogBody>
+            <DialogFooter>
+              <Box as="button" onClick={() => setBidsModal(prev => ({ ...prev, open: false }))} px={4} py={2} bg="gray.700" rounded="md" color="white" _hover={{ bg: 'gray.600' }}>Close</Box>
+            </DialogFooter>
+          </DialogContent>
+        </DialogPositioner>
+      </DialogRoot>
     </Box>
   );
 };

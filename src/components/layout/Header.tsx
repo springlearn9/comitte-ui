@@ -7,16 +7,17 @@ const Header: React.FC = () => {
   const { user, logout } = useAuth();
 
   return (
-    <Box as="header" bg="gray.900" borderBottomWidth="1px" borderColor="gray.800" px={6} py={5} backdropFilter="auto" backdropBlur="sm">
+    <Box as="header" bg="gray.900" borderBottomWidth="1px" borderColor="gray.800" px={4} py={3} backdropFilter="auto" backdropBlur="sm">
       <Box display="flex" alignItems="center" justifyContent="space-between">
         {/* Search */}
         <Box flex="1" maxW="xl" position="relative">
-          <Box position="absolute" left={3} top="50%" transform="translateY(-50%)" color="gray.400">
-            <Search size={18} />
+          <Box position="absolute" left={2.5} top="50%" transform="translateY(-50%)" color="gray.400">
+            <Search size={16} />
           </Box>
           <Input
             placeholder="Search Comitte..."
-            pl={9}
+            pl={8}
+            size="sm"
             bg="gray.800"
             borderColor="gray.700"
             color="white"
@@ -26,33 +27,34 @@ const Header: React.FC = () => {
         </Box>
 
         {/* Right side */}
-        <Stack direction="row" align="center" gap={3} ml={4}>
+        <Stack direction="row" align="center" gap={2} ml={3}>
           {/* User Display */}
           <Box display="flex" alignItems="center" gap={2}>
-            <Box w={8} h={8} rounded="full" bg="gray.700" borderWidth="2px" borderColor="red.500" display="flex" alignItems="center" justifyContent="center">
-              <Text color="white" fontWeight="bold" fontSize="sm">{(user?.username || 'U').charAt(0).toUpperCase()}</Text>
+            <Box w={7} h={7} rounded="full" bg="gray.700" borderWidth="2px" borderColor="red.500" display="flex" alignItems="center" justifyContent="center">
+              <Text color="white" fontWeight="bold" fontSize="xs">{(user?.username || 'U').charAt(0).toUpperCase()}</Text>
             </Box>
             <Box display={{ base: 'none', sm: 'block' }}>
-              <Text color="white" fontSize="sm" fontWeight="medium">{user?.username}</Text>
-              <Text color="gray.400" fontSize="xs">{user?.email}</Text>
+              <Text color="white" fontSize="xs" fontWeight="medium">{user?.username}</Text>
+              <Text color="gray.400" fontSize="2xs">{user?.email}</Text>
             </Box>
           </Box>
 
           {/* Action Buttons */}
-          <Button variant="ghost" color="gray.300" _hover={{ color: 'white', bg: 'gray.800' }} aria-label="Notifications">
-            <Bell size={20} />
+          <Button variant="ghost" size="sm" color="gray.300" _hover={{ color: 'white', bg: 'gray.800' }} aria-label="Notifications">
+            <Bell size={16} />
           </Button>
-          <Button variant="ghost" color="gray.300" _hover={{ color: 'white', bg: 'gray.800' }} aria-label="Settings">
-            <Settings size={20} />
+          <Button variant="ghost" size="sm" color="gray.300" _hover={{ color: 'white', bg: 'gray.800' }} aria-label="Settings">
+            <Settings size={16} />
           </Button>
           <Button 
             variant="ghost" 
+            size="sm"
             color="red.400" 
             _hover={{ color: 'red.300', bg: 'red.500/10' }} 
             aria-label="Logout"
             onClick={logout}
           >
-            <LogOut size={20} />
+            <LogOut size={16} />
           </Button>
         </Stack>
       </Box>

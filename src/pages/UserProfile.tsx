@@ -233,9 +233,9 @@ const UserProfile: React.FC = () => {
   };
 
   return (
-    <Box p={6}>
+    <Box p={4}>
       {/* Header */}
-      <Box display="flex" alignItems="center" gap={4} mb={6}>
+      <Box display="flex" alignItems="center" gap={3} mb={4}>
         <Button
           variant="ghost"
           size="sm"
@@ -243,7 +243,7 @@ const UserProfile: React.FC = () => {
           color="gray.400"
           _hover={{ color: 'white', bg: 'gray.800' }}
         >
-          <ArrowLeft size={16} />
+          <ArrowLeft size={14} />
         </Button>
         <Box>
           <Text as="h1" fontSize="xl" fontWeight="bold" color="white" mb={1}>
@@ -257,29 +257,29 @@ const UserProfile: React.FC = () => {
 
       {/* Success/Error Messages */}
       {successMessage && (
-        <Box bg="green.900" borderColor="green.600" borderWidth="1px" rounded="lg" p={4} mb={4}>
-          <Text color="green.200">{successMessage}</Text>
+        <Box bg="green.900" borderColor="green.600" borderWidth="1px" rounded="lg" p={3} mb={3}>
+          <Text color="green.200" fontSize="xs">{successMessage}</Text>
         </Box>
       )}
       
       {errorMessage && (
-        <Box bg="red.900" borderColor="red.600" borderWidth="1px" rounded="lg" p={4} mb={4}>
-          <Text color="red.200">{errorMessage}</Text>
+        <Box bg="red.900" borderColor="red.600" borderWidth="1px" rounded="lg" p={3} mb={3}>
+          <Text color="red.200" fontSize="xs">{errorMessage}</Text>
         </Box>
       )}
 
       {/* Loading State */}
       {dataLoading && (
-        <Box bg="gray.900" borderColor="gray.800" borderWidth="1px" rounded="lg" p={8} textAlign="center">
-          <Text color="gray.400">Loading profile data...</Text>
+        <Box bg="gray.900" borderColor="gray.800" borderWidth="1px" rounded="lg" p={6} textAlign="center">
+          <Text color="gray.400" fontSize="xs">Loading profile data...</Text>
         </Box>
       )}
 
       {!dataLoading && (
         <Box>
           {/* Horizontal Navigation Tabs */}
-          <Box mb={6}>
-            <Box display="flex" gap={2} borderBottom="1px solid" borderColor="gray.800" pb={4}>
+          <Box mb={4}>
+            <Box display="flex" gap={2} borderBottom="1px solid" borderColor="gray.800" pb={3}>
               <Button
                 variant={activeTab === 'personal' ? 'solid' : 'ghost'}
                 bg={activeTab === 'personal' ? 'blue.600' : 'transparent'}
@@ -334,20 +334,20 @@ const UserProfile: React.FC = () => {
           <Box>
           {/* Personal Information Tab */}
           {activeTab === 'personal' && (
-            <Box bg="gray.900" borderColor="gray.800" borderWidth="1px" rounded="lg" p={6}>
-              <Text fontSize="xl" fontWeight="semibold" color="white" mb={6}>
+            <Box bg="gray.900" borderColor="gray.800" borderWidth="1px" rounded="lg" p={4}>
+              <Text fontSize="md" fontWeight="semibold" color="white" mb={4}>
                 Personal Information
               </Text>
               
               {/* Profile Picture */}
-              <Box mb={6}>
-                <Text color="white" fontSize="sm" fontWeight="medium" mb={3}>
+              <Box mb={4}>
+                <Text color="white" fontSize="xs" fontWeight="medium" mb={2}>
                   Profile Picture
                 </Text>
-                <Box display="flex" alignItems="center" gap={4}>
+                <Box display="flex" alignItems="center" gap={3}>
                   <Box
-                    w={20}
-                    h={20}
+                    w={16}
+                    h={16}
                     bg="gray.700"
                     rounded="full"
                     display="flex"
@@ -361,11 +361,11 @@ const UserProfile: React.FC = () => {
                         style={{ width: '100%', height: '100%', borderRadius: '50%' }}
                       />
                     ) : (
-                      <User size={32} color="#9ca3af" />
+                      <User size={24} color="#9ca3af" />
                     )}
                   </Box>
                   <Button
-                    size="sm"
+                    size="xs"
                     variant="outline"
                     colorScheme="gray"
                     bg="gray.600"
@@ -373,17 +373,17 @@ const UserProfile: React.FC = () => {
                     borderColor="gray.500"
                     _hover={{ bg: 'white', color: 'black' }}
                   >
-                    <Box display="flex" alignItems="center" gap={2}>
-                      <Camera size={14} />
+                    <Box display="flex" alignItems="center" gap={1.5}>
+                      <Camera size={12} />
                       Change Photo
                     </Box>
                   </Button>
                 </Box>
               </Box>
 
-              <Stack gap={4}>
+              <Stack gap={3}>
                 <Box>
-                  <Text color="white" fontSize="sm" fontWeight="medium" mb={2}>
+                  <Text color="white" fontSize="xs" fontWeight="medium" mb={1.5}>
                     Full Name
                   </Text>
                   <Input
@@ -399,7 +399,7 @@ const UserProfile: React.FC = () => {
                 </Box>
 
                 <Box>
-                  <Text color="white" fontSize="sm" fontWeight="medium" mb={2}>
+                  <Text color="white" fontSize="xs" fontWeight="medium" mb={1.5}>
                     Username
                   </Text>
                   <Input
@@ -414,9 +414,9 @@ const UserProfile: React.FC = () => {
                   />
                 </Box>
 
-                <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
+                <SimpleGrid columns={{ base: 1, md: 2 }} gap={3}>
                   <Box>
-                    <Text color="white" fontSize="sm" fontWeight="medium" mb={2}>
+                    <Text color="white" fontSize="xs" fontWeight="medium" mb={1.5}>
                       Email Address
                     </Text>
                     <Input
@@ -433,7 +433,7 @@ const UserProfile: React.FC = () => {
                   </Box>
                   
                   <Box>
-                    <Text color="white" fontSize="sm" fontWeight="medium" mb={2}>
+                    <Text color="white" fontSize="xs" fontWeight="medium" mb={1.5}>
                       Phone Number
                     </Text>
                     <Input
@@ -449,9 +449,9 @@ const UserProfile: React.FC = () => {
                   </Box>
                 </SimpleGrid>
 
-                <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
+                <SimpleGrid columns={{ base: 1, md: 2 }} gap={3}>
                   <Box>
-                    <Text color="white" fontSize="sm" fontWeight="medium" mb={2}>
+                    <Text color="white" fontSize="xs" fontWeight="medium" mb={1.5}>
                       Date of Birth
                     </Text>
                     <Input
@@ -466,7 +466,7 @@ const UserProfile: React.FC = () => {
                   </Box>
                   
                   <Box>
-                    <Text color="white" fontSize="sm" fontWeight="medium" mb={2}>
+                    <Text color="white" fontSize="xs" fontWeight="medium" mb={1.5}>
                       Aadhar Number
                     </Text>
                     <Input
@@ -484,7 +484,7 @@ const UserProfile: React.FC = () => {
                 </SimpleGrid>
 
                 <Box>
-                  <Text color="white" fontSize="sm" fontWeight="medium" mb={2}>
+                  <Text color="white" fontSize="xs" fontWeight="medium" mb={1.5}>
                     Address
                   </Text>
                   <Textarea
@@ -505,27 +505,27 @@ const UserProfile: React.FC = () => {
 
           {/* Security Tab */}
           {activeTab === 'security' && (
-            <Box bg="gray.900" borderColor="gray.800" borderWidth="1px" rounded="lg" p={6}>
-              <Text fontSize="xl" fontWeight="semibold" color="white" mb={6}>
+            <Box bg="gray.900" borderColor="gray.800" borderWidth="1px" rounded="lg" p={4}>
+              <Text fontSize="md" fontWeight="semibold" color="white" mb={4}>
                 Security Settings
               </Text>
               
-              <Stack gap={6}>
+              <Stack gap={4}>
                 <Box>
-                  <Text color="white" fontSize="lg" fontWeight="medium" mb={4}>
+                  <Text color="white" fontSize="sm" fontWeight="medium" mb={3}>
                     Password
                   </Text>
-                  <Box display="flex" justifyContent="space-between" alignItems="center" p={4} bg="gray.800" rounded="lg">
+                  <Box display="flex" justifyContent="space-between" alignItems="center" p={3} bg="gray.800" rounded="lg">
                     <Box>
-                      <Text color="white" fontSize="sm" fontWeight="medium">
+                      <Text color="white" fontSize="xs" fontWeight="medium">
                         Change Password
                       </Text>
-                      <Text color="gray.400" fontSize="xs">
+                      <Text color="gray.400" fontSize="2xs">
                         Last changed 3 months ago
                       </Text>
                     </Box>
                     <Button
-                      size="sm"
+                      size="xs"
                       variant="outline"
                       colorScheme="gray"
                       bg="gray.600"
@@ -540,15 +540,15 @@ const UserProfile: React.FC = () => {
                 </Box>
 
                 <Box>
-                  <Text color="white" fontSize="lg" fontWeight="medium" mb={4}>
+                  <Text color="white" fontSize="sm" fontWeight="medium" mb={3}>
                     Two-Factor Authentication
                   </Text>
-                  <Box display="flex" justifyContent="space-between" alignItems="center" p={4} bg="gray.800" rounded="lg">
+                  <Box display="flex" justifyContent="space-between" alignItems="center" p={3} bg="gray.800" rounded="lg">
                     <Box>
-                      <Text color="white" fontSize="sm" fontWeight="medium">
+                      <Text color="white" fontSize="xs" fontWeight="medium">
                         Two-Factor Authentication
                       </Text>
-                      <Text color="gray.400" fontSize="xs">
+                      <Text color="gray.400" fontSize="2xs">
                         Add an extra layer of security to your account
                       </Text>
                     </Box>
@@ -557,8 +557,8 @@ const UserProfile: React.FC = () => {
                       checked={profileData.twoFactorEnabled}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('twoFactorEnabled', e.target.checked)}
                       style={{
-                        width: '20px',
-                        height: '20px',
+                        width: '18px',
+                        height: '18px',
                         accentColor: '#3b82f6'
                       }}
                     />
@@ -566,15 +566,15 @@ const UserProfile: React.FC = () => {
                 </Box>
 
                 <Box>
-                  <Text color="white" fontSize="lg" fontWeight="medium" mb={4}>
+                  <Text color="white" fontSize="sm" fontWeight="medium" mb={3}>
                     Profile Visibility
                   </Text>
-                  <Box display="flex" justifyContent="space-between" alignItems="center" p={4} bg="gray.800" rounded="lg">
+                  <Box display="flex" justifyContent="space-between" alignItems="center" p={3} bg="gray.800" rounded="lg">
                     <Box>
-                      <Text color="white" fontSize="sm" fontWeight="medium">
+                      <Text color="white" fontSize="xs" fontWeight="medium">
                         Public Profile
                       </Text>
-                      <Text color="gray.400" fontSize="xs">
+                      <Text color="gray.400" fontSize="2xs">
                         Allow others to view your profile information
                       </Text>
                     </Box>
@@ -583,8 +583,8 @@ const UserProfile: React.FC = () => {
                       checked={profileData.profileVisibility}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('profileVisibility', e.target.checked)}
                       style={{
-                        width: '20px',
-                        height: '20px',
+                        width: '18px',
+                        height: '18px',
                         accentColor: '#3b82f6'
                       }}
                     />
@@ -592,18 +592,18 @@ const UserProfile: React.FC = () => {
                 </Box>
 
                 <Box>
-                  <Text color="white" fontSize="lg" fontWeight="medium" mb={4}>
+                  <Text color="white" fontSize="sm" fontWeight="medium" mb={3}>
                     Danger Zone
                   </Text>
-                  <Box p={4} bg="red.900" borderColor="red.600" borderWidth="1px" rounded="lg">
-                    <Text color="red.200" fontSize="sm" fontWeight="medium" mb={2}>
+                  <Box p={3} bg="red.900" borderColor="red.600" borderWidth="1px" rounded="lg">
+                    <Text color="red.200" fontSize="xs" fontWeight="medium" mb={1.5}>
                       Deactivate Account
                     </Text>
-                    <Text color="red.300" fontSize="xs" mb={4}>
+                    <Text color="red.300" fontSize="2xs" mb={3}>
                       Once you deactivate your account, you will lose access to all committee data.
                     </Text>
                     <Button
-                      size="sm"
+                      size="xs"
                       colorScheme="red"
                       variant="outline"
                       onClick={handleAccountDeactivation}
@@ -618,18 +618,18 @@ const UserProfile: React.FC = () => {
 
           {/* Notifications Tab */}
           {activeTab === 'notifications' && (
-            <Box bg="gray.900" borderColor="gray.800" borderWidth="1px" rounded="lg" p={6}>
-              <Text fontSize="xl" fontWeight="semibold" color="white" mb={6}>
+            <Box bg="gray.900" borderColor="gray.800" borderWidth="1px" rounded="lg" p={4}>
+              <Text fontSize="md" fontWeight="semibold" color="white" mb={4}>
                 Notification Preferences
               </Text>
               
-              <Stack gap={4}>
-                <Box display="flex" justifyContent="space-between" alignItems="center" p={4} bg="gray.800" rounded="lg">
+              <Stack gap={3}>
+                <Box display="flex" justifyContent="space-between" alignItems="center" p={3} bg="gray.800" rounded="lg">
                   <Box>
-                    <Text color="white" fontSize="sm" fontWeight="medium">
+                    <Text color="white" fontSize="xs" fontWeight="medium">
                       Email Notifications
                     </Text>
-                    <Text color="gray.400" fontSize="xs">
+                    <Text color="gray.400" fontSize="2xs">
                       Receive notifications via email
                     </Text>
                   </Box>
@@ -638,19 +638,19 @@ const UserProfile: React.FC = () => {
                     checked={profileData.emailNotifications}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('emailNotifications', e.target.checked)}
                     style={{
-                      width: '20px',
-                      height: '20px',
+                      width: '18px',
+                      height: '18px',
                       accentColor: '#3b82f6'
                     }}
                   />
                 </Box>
 
-                <Box display="flex" justifyContent="space-between" alignItems="center" p={4} bg="gray.800" rounded="lg">
+                <Box display="flex" justifyContent="space-between" alignItems="center" p={3} bg="gray.800" rounded="lg">
                   <Box>
-                    <Text color="white" fontSize="sm" fontWeight="medium">
+                    <Text color="white" fontSize="xs" fontWeight="medium">
                       SMS Notifications
                     </Text>
-                    <Text color="gray.400" fontSize="xs">
+                    <Text color="gray.400" fontSize="2xs">
                       Receive notifications via SMS
                     </Text>
                   </Box>
@@ -659,33 +659,33 @@ const UserProfile: React.FC = () => {
                     checked={profileData.smsNotifications}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('smsNotifications', e.target.checked)}
                     style={{
-                      width: '20px',
-                      height: '20px',
+                      width: '18px',
+                      height: '18px',
                       accentColor: '#3b82f6'
                     }}
                   />
                 </Box>
 
-                <Box p={4} bg="gray.800" rounded="lg">
-                  <Text color="white" fontSize="sm" fontWeight="medium" mb={3}>
+                <Box p={3} bg="gray.800" rounded="lg">
+                  <Text color="white" fontSize="xs" fontWeight="medium" mb={2}>
                     Email Notification Types
                   </Text>
-                  <Stack gap={3}>
+                  <Stack gap={2}>
                     <Box display="flex" justifyContent="space-between" alignItems="center">
-                      <Text color="gray.300" fontSize="xs">Committee updates</Text>
-                      <input type="checkbox" defaultChecked style={{ width: '16px', height: '16px', accentColor: '#3b82f6' }} />
+                      <Text color="gray.300" fontSize="2xs">Committee updates</Text>
+                      <input type="checkbox" defaultChecked style={{ width: '14px', height: '14px', accentColor: '#3b82f6' }} />
                     </Box>
                     <Box display="flex" justifyContent="space-between" alignItems="center">
-                      <Text color="gray.300" fontSize="xs">Bid notifications</Text>
-                      <input type="checkbox" defaultChecked style={{ width: '16px', height: '16px', accentColor: '#3b82f6' }} />
+                      <Text color="gray.300" fontSize="2xs">Bid notifications</Text>
+                      <input type="checkbox" defaultChecked style={{ width: '14px', height: '14px', accentColor: '#3b82f6' }} />
                     </Box>
                     <Box display="flex" justifyContent="space-between" alignItems="center">
-                      <Text color="gray.300" fontSize="xs">Member activity</Text>
-                      <input type="checkbox" style={{ width: '16px', height: '16px', accentColor: '#3b82f6' }} />
+                      <Text color="gray.300" fontSize="2xs">Member activity</Text>
+                      <input type="checkbox" style={{ width: '14px', height: '14px', accentColor: '#3b82f6' }} />
                     </Box>
                     <Box display="flex" justifyContent="space-between" alignItems="center">
-                      <Text color="gray.300" fontSize="xs">Security alerts</Text>
-                      <input type="checkbox" defaultChecked style={{ width: '16px', height: '16px', accentColor: '#3b82f6' }} />
+                      <Text color="gray.300" fontSize="2xs">Security alerts</Text>
+                      <input type="checkbox" defaultChecked style={{ width: '14px', height: '14px', accentColor: '#3b82f6' }} />
                     </Box>
                   </Stack>
                 </Box>
@@ -694,7 +694,7 @@ const UserProfile: React.FC = () => {
           )}
 
           {/* Save Button */}
-          <Box mt={6} display="flex" justifyContent="flex-end">
+          <Box mt={4} display="flex" justifyContent="flex-end">
             <Button
               colorScheme="blue"
               bg="blue.600"
@@ -703,10 +703,10 @@ const UserProfile: React.FC = () => {
               loading={isLoading}
               loadingText="Saving..."
               onClick={handleSave}
-              size="lg"
+              size="md"
             >
-              <Box display="flex" alignItems="center" gap={2}>
-                <Save size={16} />
+              <Box display="flex" alignItems="center" gap={1.5}>
+                <Save size={14} />
                 Save Changes
               </Box>
             </Button>
