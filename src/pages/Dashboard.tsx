@@ -306,10 +306,10 @@ const Dashboard: React.FC = () => {
                 >
                   <Box display="flex" alignItems="center" gap={3} mb={3}>
                     <Building size={20} color="#ef4444" />
-                    <Text color="white" fontWeight="medium" fontSize="xs">Committees</Text>
+                    <Text color="white" fontWeight="medium" fontSize="sm">Committees</Text>
                   </Box>
-                  <Text color="red.500" fontWeight="bold" fontSize="xl" mb={0.5}>{stats.totalCommittees}</Text>
-                  <Text color="gray.400" fontSize="2xs">Your committees</Text>
+                  <Text color="red.500" fontWeight="bold" fontSize="2xl" mb={0.5}>{stats.totalCommittees}</Text>
+                  <Text color="gray.400" fontSize="xs">Your committees</Text>
                 </Box>
               </Box>
 
@@ -331,10 +331,10 @@ const Dashboard: React.FC = () => {
                 >
                   <Box display="flex" alignItems="center" gap={3} mb={3}>
                     <Users size={20} color="#3b82f6" />
-                    <Text color="white" fontWeight="medium" fontSize="xs">Members</Text>
+                    <Text color="white" fontWeight="medium" fontSize="sm">Members</Text>
                   </Box>
-                  <Text color="blue.400" fontWeight="bold" fontSize="xl" mb={0.5}>{stats.totalMembers}</Text>
-                  <Text color="gray.400" fontSize="2xs">Across all committees</Text>
+                  <Text color="blue.400" fontWeight="bold" fontSize="2xl" mb={0.5}>{stats.totalMembers}</Text>
+                  <Text color="gray.400" fontSize="xs">Across all committees</Text>
                 </Box>
               </Box>
 
@@ -356,10 +356,10 @@ const Dashboard: React.FC = () => {
                 >
                   <Box display="flex" alignItems="center" gap={3} mb={3}>
                     <FileText size={20} color="#10b981" />
-                    <Text color="white" fontWeight="medium" fontSize="xs">Bids</Text>
+                    <Text color="white" fontWeight="medium" fontSize="sm">Bids</Text>
                   </Box>
-                  <Text color="green.400" fontWeight="bold" fontSize="xl" mb={0.5}>{stats.totalBids}</Text>
-                  <Text color="gray.400" fontSize="2xs">Total submissions</Text>
+                  <Text color="green.400" fontWeight="bold" fontSize="2xl" mb={0.5}>{stats.totalBids}</Text>
+                  <Text color="gray.400" fontSize="xs">Total submissions</Text>
                 </Box>
               </Box>
 
@@ -381,10 +381,10 @@ const Dashboard: React.FC = () => {
                 >
                   <Box display="flex" alignItems="center" gap={3} mb={3}>
                     <TrendingUp size={20} color="#8b5cf6" />
-                    <Text color="white" fontWeight="medium" fontSize="xs">Activity</Text>
+                    <Text color="white" fontWeight="medium" fontSize="sm">Activity</Text>
                   </Box>
-                  <Text color="purple.400" fontWeight="bold" fontSize="xl" mb={0.5}>{stats.recentActivity.length}</Text>
-                  <Text color="gray.400" fontSize="2xs">Recent actions</Text>
+                  <Text color="purple.400" fontWeight="bold" fontSize="2xl" mb={0.5}>{stats.recentActivity.length}</Text>
+                  <Text color="gray.400" fontSize="xs">Recent actions</Text>
                 </Box>
               </Box>
             </SimpleGrid>
@@ -395,14 +395,14 @@ const Dashboard: React.FC = () => {
               <Box bg="gray.900" borderColor="gray.800" borderWidth="1px" rounded="lg">
                 <Box px={3} py={2} borderBottomWidth="1px" borderColor="gray.800" display="flex" alignItems="center" justifyContent="space-between">
                   <Box>
-                    <Text color="white" fontWeight="semibold" fontSize="sm">My Committees</Text>
-                    <Text color="gray.400" fontSize="2xs" mt={0.5}>Committees you're part of</Text>
+                    <Text color="white" fontWeight="semibold" fontSize="md">My Committees</Text>
+                    <Text color="gray.400" fontSize="xs" mt={0.5}>Committees you're part of</Text>
                   </Box>
                   <Box as={Link} to="/committees" display="flex" alignItems="center" gap={1}>
-                    <Text color="blue.400" fontSize="xs" cursor="pointer" _hover={{ textDecoration: "underline" }}>
+                    <Text color="blue.400" fontSize="sm" cursor="pointer" _hover={{ textDecoration: "underline" }}>
                       View All
                     </Text>
-                    <Text color="blue.400" fontSize="xs">→</Text>
+                    <Text color="blue.400" fontSize="sm">→</Text>
                   </Box>
                 </Box>
                 <Box px={3} py={2} maxH="300px" overflowY="auto">
@@ -417,14 +417,14 @@ const Dashboard: React.FC = () => {
                                 {committee.name}
                               </Text>
                               {committee.bidsRatio && (
-                                <Box bg="gray.700" color="gray.100" px={1.5} py={0.5} rounded="full" fontSize="2xs">
+                                <Box bg="gray.700" color="gray.100" px={1.5} py={0.5} rounded="full" fontSize="xs">
                                   {committee.bidsRatio}
                                 </Box>
                               )}
                             </Box>
                             {/* Row 1 Column 2: Full Share */}
                             <Box display="flex" alignItems="center">
-                              <Text color="green.400" fontSize="2xs" fontWeight="medium">
+                              <Text color="green.400" fontSize="xs" fontWeight="medium">
                                 {committee.fullShare ? `₹${committee.fullShare}` : 'N/A'}
                               </Text>
                             </Box>
@@ -438,12 +438,12 @@ const Dashboard: React.FC = () => {
                           <Box display="grid" gridTemplateColumns="2fr 1fr 1fr" gap={3}>
                             {/* Row 2 Column 1: Start Date */}
                             <Box>
-                              <Text color="gray.500" fontSize="2xs" mb={0.5}>Start Date</Text>
-                              <Text color="gray.300" fontSize="2xs">{formatDate(committee.startDate)}</Text>
+                              <Text color="gray.500" fontSize="xs" mb={0.5}>Start Date</Text>
+                              <Text color="gray.300" fontSize="xs">{formatDate(committee.startDate)}</Text>
                             </Box>
                             {/* Row 2 Column 2: Members Link */}
                             <Box>
-                              <Text color="gray.500" fontSize="2xs" mb={0.5}>Members</Text>
+                              <Text color="gray.500" fontSize="xs" mb={0.5}>Members</Text>
                               <Box 
                                 as="button" 
                                 onClick={() => openMembers(committee.id, committee.name)} 
@@ -459,15 +459,15 @@ const Dashboard: React.FC = () => {
                                 borderRadius="md"
                                 transition="all 0.2s"
                               >
-                                <Text fontSize="2xs" fontWeight="semibold">
+                                <Text fontSize="xs" fontWeight="semibold">
                                   {committee.membersCount}
                                 </Text>
-                                <Users size={12} />
+                                <Users size={14} />
                               </Box>
                             </Box>
                             {/* Row 2 Column 3: Bids Link */}
                             <Box>
-                              <Text color="gray.500" fontSize="2xs" mb={0.5}>Bids</Text>
+                              <Text color="gray.500" fontSize="xs" mb={0.5}>Bids</Text>
                               <Box 
                                 as="button" 
                                 onClick={() => openBids(committee.id, committee.name)} 
@@ -483,10 +483,10 @@ const Dashboard: React.FC = () => {
                                 borderRadius="md"
                                 transition="all 0.2s"
                               >
-                                <Text fontSize="2xs" fontWeight="semibold">
+                                <Text fontSize="xs" fontWeight="semibold">
                                   {committee.bidsRatio || '0'}
                                 </Text>
-                                <IndianRupee size={12} />
+                                <IndianRupee size={14} />
                               </Box>
                             </Box>
                           </Box>
@@ -495,8 +495,8 @@ const Dashboard: React.FC = () => {
                     </Stack>
                   ) : (
                     <Box textAlign="center" py={4}>
-                      <Text color="gray.500" fontSize="xs">No committees</Text>
-                      <Text color="gray.600" fontSize="2xs">Join or create committees</Text>
+                      <Text color="gray.500" fontSize="sm">No committees</Text>
+                      <Text color="gray.600" fontSize="xs">Join or create committees</Text>
                     </Box>
                   )}
                 </Box>
@@ -506,14 +506,14 @@ const Dashboard: React.FC = () => {
               <Box bg="gray.900" borderColor="gray.800" borderWidth="1px" rounded="lg">
                 <Box px={3} py={2} borderBottomWidth="1px" borderColor="gray.800" display="flex" alignItems="center" justifyContent="space-between">
                   <Box>
-                    <Text color="white" fontWeight="semibold" fontSize="sm">Recent Bid Activity</Text>
-                    <Text color="gray.400" fontSize="2xs" mt={0.5}>Latest bids from your committees</Text>
+                    <Text color="white" fontWeight="semibold" fontSize="md">Recent Bid Activity</Text>
+                    <Text color="gray.400" fontSize="xs" mt={0.5}>Latest bids from your committees</Text>
                   </Box>
                   <Box as={Link} to="/bids" display="flex" alignItems="center" gap={1}>
-                    <Text color="blue.400" fontSize="xs" cursor="pointer" _hover={{ textDecoration: "underline" }}>
+                    <Text color="blue.400" fontSize="sm" cursor="pointer" _hover={{ textDecoration: "underline" }}>
                       View All
                     </Text>
-                    <Text color="blue.400" fontSize="xs">→</Text>
+                    <Text color="blue.400" fontSize="sm">→</Text>
                   </Box>
                 </Box>
                 <Box px={3} py={2} maxH="300px" overflowY="auto">
@@ -522,14 +522,14 @@ const Dashboard: React.FC = () => {
                       {stats.recentActivity.slice(0, 3).map((activity) => (
                         <Box key={activity.id} p={2} bg="gray.800" rounded="md" borderLeft="3px solid" borderColor="green.400">
                           <Box display="flex" alignItems="center" justifyContent="space-between" mb={1}>
-                            <Text color="green.400" fontSize="2xs" fontWeight="semibold">
+                            <Text color="green.400" fontSize="xs" fontWeight="semibold">
                               {activity.committeeName}
                             </Text>
-                            <Text color="gray.500" fontSize="2xs">
+                            <Text color="gray.500" fontSize="xs">
                               {formatRelativeTime(activity.timestamp)}
                             </Text>
                           </Box>
-                          <Text color="white" fontSize="xs" lineHeight="1.3">
+                          <Text color="white" fontSize="sm" lineHeight="1.3">
                             <Text as="span" color="blue.300" fontWeight="medium">{activity.bidderName}</Text>
                             <Text as="span"> bid </Text>
                             <Text as="span" color="blue.300" fontWeight="medium">{formatCurrency(activity.amount || 0)}</Text>
@@ -539,8 +539,8 @@ const Dashboard: React.FC = () => {
                     </Stack>
                   ) : (
                     <Box textAlign="center" py={4}>
-                      <Text color="gray.500" fontSize="xs">No recent activity</Text>
-                      <Text color="gray.600" fontSize="2xs">Activity will appear here</Text>
+                      <Text color="gray.500" fontSize="sm">No recent activity</Text>
+                      <Text color="gray.600" fontSize="xs">Activity will appear here</Text>
                     </Box>
                   )}
                 </Box>
