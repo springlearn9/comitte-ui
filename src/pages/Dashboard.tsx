@@ -31,21 +31,6 @@ interface DashboardStats {
     status: string;
     createdDate: string;
   }>;
-  ownedCommittees: Array<{
-    id: number;
-    name: string;
-    totalAmount: number;
-    membersCount: number;
-    status: string;
-    createdDate: string;
-  }>;
-  allMembers: Array<{
-    id: number;
-    name: string;
-    email: string;
-    committeesCount: number;
-    status: string;
-  }>;
 }
 
 const Dashboard: React.FC = () => {
@@ -55,9 +40,7 @@ const Dashboard: React.FC = () => {
     totalMembers: 0,
     totalBids: 0,
     recentActivity: [],
-    myCommittees: [],
-    ownedCommittees: [],
-    allMembers: []
+    myCommittees: []
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -98,16 +81,15 @@ const Dashboard: React.FC = () => {
         }
 
         // Fetch committees and bids data
-        const [committeesData, bidsData, ownedCommitteesData] = await Promise.all([
-          committeeService.getByMember(memberId).catch(() => []),
-          bidService.getByMember(memberId).catch(() => []),
-          committeeService.getByOwner(memberId).catch(() => [])
+        const [myCommitteesData, bidsData] = await Promise.all([
+          committeeService.getMyCommittees(memberId).catch(() => []),
+          bidService.getByMember(memberId).catch(() => [])
         ]);
 
-        // Calculate total members across all committees
+        // Calculate total members across all my committees
         let totalMembersCount = 0;
         const memberCounts = await Promise.all(
-          committeesData.map(async (committee) => {
+          myCommitteesData.map(async (committee) => {
             try {
               const members = await memberService.getByCommittee(committee.comitteId);
               return members.length;
@@ -134,7 +116,7 @@ const Dashboard: React.FC = () => {
         }> = [];
         
         // Add committee activities
-        committeesData.forEach((committee) => {
+        myCommitteesData.forEach((committee) => {
           if (committee.createdTimestamp) {
             recentActivity.push({
               id: `committee-${committee.comitteId}`,
@@ -157,7 +139,7 @@ const Dashboard: React.FC = () => {
             const monthlyShare = bid.monthlyShare || 0;
             
             // Find matching committee to get bidsRatio
-            const matchingCommittee = committeesData.find(c => c.comitteId === bid.comitteId);
+            const matchingCommittee = myCommitteesData.find(c => c.comitteId === bid.comitteId);
             const bidsRatio = matchingCommittee?.bidsRatio ? String(matchingCommittee.bidsRatio) : '';
             
             recentActivity.push({
@@ -180,70 +162,22 @@ const Dashboard: React.FC = () => {
         recentActivity.sort((a, b) => b.date.getTime() - a.date.getTime());
         const recentActivities = recentActivity.slice(0, 5).map(({ date, ...activity }) => activity);
 
-        // Process committees data for display
-        const myCommittees = committeesData.slice(0, 5).map(committee => ({
+        // Process my committees data for display (includes both member and owned)
+        const myCommittees = myCommitteesData.slice(0, 5).map(committee => ({
           id: committee.comitteId,
           name: committee.comitteName || 'Unnamed Committee',
           totalAmount: committee.totalAmount || 0,
-          membersCount: memberCounts[committeesData.indexOf(committee)] || 0,
+          membersCount: memberCounts[myCommitteesData.indexOf(committee)] || 0,
           status: 'ACTIVE',
           createdDate: committee.createdTimestamp || new Date().toISOString()
         }));
 
-        // Calculate member counts for owned committees
-        const ownedMemberCounts = await Promise.all(
-          ownedCommitteesData.map(async (committee) => {
-            try {
-              const members = await memberService.getByCommittee(committee.comitteId);
-              return members.length;
-            } catch {
-              return 0;
-            }
-          })
-        );
-
-        // Process owned committees using the getByOwner API data
-        const ownedCommittees = ownedCommitteesData.slice(0, 5).map((committee, index) => ({
-          id: committee.comitteId,
-          name: committee.comitteName || 'Unnamed Committee',
-          totalAmount: committee.fullAmount || 0,
-          membersCount: ownedMemberCounts[index] || 0,
-          status: 'OWNED',
-          createdDate: committee.createdTimestamp || new Date().toISOString()
-        }));
-
-        // Fetch all members from all committees
-        const allMembersSet = new Set();
-        const allMembersArray = [];
-        
-        for (const committee of committeesData) {
-          try {
-            const members = await memberService.getByCommittee(committee.comitteId);
-            members.forEach(member => {
-              if (!allMembersSet.has(member.memberId)) {
-                allMembersSet.add(member.memberId);
-                allMembersArray.push({
-                  id: member.memberId,
-                  name: member.memberName || 'Unknown Member',
-                  email: member.email || 'No email',
-                  committeesCount: 1, // This could be calculated more accurately
-                  status: 'ACTIVE'
-                });
-              }
-            });
-          } catch (error) {
-            // Handle error silently
-          }
-        }
-
         setStats({
-          totalCommittees: committeesData.length,
+          totalCommittees: myCommitteesData.length,
           totalMembers: totalMembersCount,
           totalBids: bidsData.length,
           recentActivity: recentActivities,
-          myCommittees: myCommittees,
-          ownedCommittees: ownedCommittees,
-          allMembers: allMembersArray.slice(0, 8) // Show first 8 members
+          myCommittees: myCommittees
         });
 
       } catch (err: any) {
@@ -412,50 +346,6 @@ const Dashboard: React.FC = () => {
 
             {/* Four Information Sections */}
             <SimpleGrid columns={{ base: 1, lg: 2 }} gap={4}>
-              {/* Recent Bid Activity */}
-              <Box bg="gray.900" borderColor="gray.800" borderWidth="1px" rounded="lg">
-                <Box px={4} py={3} borderBottomWidth="1px" borderColor="gray.800" display="flex" alignItems="center" justifyContent="space-between">
-                  <Box>
-                    <Text color="white" fontWeight="semibold" fontSize="md">Recent Bid Activity</Text>
-                    <Text color="gray.400" fontSize="xs" mt={1}>Latest bids from your committees</Text>
-                  </Box>
-                  <Box as={Link} to="/bids" display="flex" alignItems="center" gap={1}>
-                    <Text color="blue.400" fontSize="sm" cursor="pointer" _hover={{ textDecoration: "underline" }}>
-                      View All
-                    </Text>
-                    <Text color="blue.400">→</Text>
-                  </Box>
-                </Box>
-                <Box px={4} py={3} maxH="300px" overflowY="auto">
-                  {stats.recentActivity.length > 0 ? (
-                    <Stack gap={3}>
-                      {stats.recentActivity.slice(0, 3).map((activity) => (
-                        <Box key={activity.id} p={3} bg="gray.800" rounded="md" borderLeft="3px solid" borderColor="green.400">
-                          <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
-                            <Text color="green.400" fontSize="xs" fontWeight="semibold">
-                              {activity.committeeName}
-                            </Text>
-                            <Text color="gray.500" fontSize="xs">
-                              {formatRelativeTime(activity.timestamp)}
-                            </Text>
-                          </Box>
-                          <Text color="white" fontSize="sm" lineHeight="1.3">
-                            <Text as="span" color="blue.300" fontWeight="medium">{activity.bidderName}</Text>
-                            <Text as="span"> bid </Text>
-                            <Text as="span" color="blue.300" fontWeight="medium">{formatCurrency(activity.amount || 0)}</Text>
-                          </Text>
-                        </Box>
-                      ))}
-                    </Stack>
-                  ) : (
-                    <Box textAlign="center" py={6}>
-                      <Text color="gray.500" fontSize="sm">No recent activity</Text>
-                      <Text color="gray.600" fontSize="xs">Activity will appear here</Text>
-                    </Box>
-                  )}
-                </Box>
-              </Box>
-
               {/* My Committees */}
               <Box bg="gray.900" borderColor="gray.800" borderWidth="1px" rounded="lg">
                 <Box px={4} py={3} borderBottomWidth="1px" borderColor="gray.800" display="flex" alignItems="center" justifyContent="space-between">
@@ -501,14 +391,14 @@ const Dashboard: React.FC = () => {
                 </Box>
               </Box>
 
-              {/* Owned Committees */}
+              {/* Recent Bid Activity */}
               <Box bg="gray.900" borderColor="gray.800" borderWidth="1px" rounded="lg">
                 <Box px={4} py={3} borderBottomWidth="1px" borderColor="gray.800" display="flex" alignItems="center" justifyContent="space-between">
                   <Box>
-                    <Text color="white" fontWeight="semibold" fontSize="md">Owned Committees</Text>
-                    <Text color="gray.400" fontSize="xs" mt={1}>Committees you manage</Text>
+                    <Text color="white" fontWeight="semibold" fontSize="md">Recent Bid Activity</Text>
+                    <Text color="gray.400" fontSize="xs" mt={1}>Latest bids from your committees</Text>
                   </Box>
-                  <Box as={Link} to="/committees" display="flex" alignItems="center" gap={1}>
+                  <Box as={Link} to="/bids" display="flex" alignItems="center" gap={1}>
                     <Text color="blue.400" fontSize="sm" cursor="pointer" _hover={{ textDecoration: "underline" }}>
                       View All
                     </Text>
@@ -516,74 +406,30 @@ const Dashboard: React.FC = () => {
                   </Box>
                 </Box>
                 <Box px={4} py={3} maxH="300px" overflowY="auto">
-                  {stats.ownedCommittees.length > 0 ? (
+                  {stats.recentActivity.length > 0 ? (
                     <Stack gap={3}>
-                      {stats.ownedCommittees.slice(0, 3).map((committee) => (
-                        <Box key={committee.id} p={3} bg="gray.800" rounded="md" borderLeft="3px solid" borderColor="orange.400">
+                      {stats.recentActivity.slice(0, 3).map((activity) => (
+                        <Box key={activity.id} p={3} bg="gray.800" rounded="md" borderLeft="3px solid" borderColor="green.400">
                           <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
-                            <Text color="white" fontSize="sm" fontWeight="medium">
-                              {committee.name}
+                            <Text color="green.400" fontSize="xs" fontWeight="semibold">
+                              {activity.committeeName}
                             </Text>
-                            <Badge colorScheme="orange" fontSize="xs">OWNER</Badge>
-                          </Box>
-                          <Box display="flex" alignItems="center" justifyContent="space-between">
-                            <Text color="gray.400" fontSize="xs">
-                              {committee.membersCount} members
-                            </Text>
-                            <Text color="green.400" fontSize="xs" fontWeight="medium">
-                              {formatCurrency(committee.totalAmount)}
+                            <Text color="gray.500" fontSize="xs">
+                              {formatRelativeTime(activity.timestamp)}
                             </Text>
                           </Box>
-                        </Box>
-                      ))}
-                    </Stack>
-                  ) : (
-                    <Box textAlign="center" py={6}>
-                      <Text color="gray.500" fontSize="sm">No owned committees</Text>
-                      <Text color="gray.600" fontSize="xs">Create your first committee</Text>
-                    </Box>
-                  )}
-                </Box>
-              </Box>
-
-              {/* All Members */}
-              <Box bg="gray.900" borderColor="gray.800" borderWidth="1px" rounded="lg">
-                <Box px={4} py={3} borderBottomWidth="1px" borderColor="gray.800" display="flex" alignItems="center" justifyContent="space-between">
-                  <Box>
-                    <Text color="white" fontWeight="semibold" fontSize="md">All Members</Text>
-                    <Text color="gray.400" fontSize="xs" mt={1}>Active committee members</Text>
-                  </Box>
-                  <Box as={Link} to="/profile" display="flex" alignItems="center" gap={1}>
-                    <Text color="blue.400" fontSize="sm" cursor="pointer" _hover={{ textDecoration: "underline" }}>
-                      View All
-                    </Text>
-                    <Text color="blue.400">→</Text>
-                  </Box>
-                </Box>
-                <Box px={4} py={3} maxH="300px" overflowY="auto">
-                  {stats.allMembers.length > 0 ? (
-                    <Stack gap={3}>
-                      {stats.allMembers.slice(0, 4).map((member) => (
-                        <Box key={member.id} p={3} bg="gray.800" rounded="md" borderLeft="3px solid" borderColor="purple.400">
-                          <Box display="flex" alignItems="center" justifyContent="space-between" mb={1}>
-                            <Text color="white" fontSize="sm" fontWeight="medium">
-                              {member.name}
-                            </Text>
-                            <Badge colorScheme="green" fontSize="xs">ACTIVE</Badge>
-                          </Box>
-                          <Text color="gray.400" fontSize="xs" mb={1}>
-                            {member.email}
-                          </Text>
-                          <Text color="purple.400" fontSize="xs">
-                            {member.committeesCount} committees
+                          <Text color="white" fontSize="sm" lineHeight="1.3">
+                            <Text as="span" color="blue.300" fontWeight="medium">{activity.bidderName}</Text>
+                            <Text as="span"> bid </Text>
+                            <Text as="span" color="blue.300" fontWeight="medium">{formatCurrency(activity.amount || 0)}</Text>
                           </Text>
                         </Box>
                       ))}
                     </Stack>
                   ) : (
                     <Box textAlign="center" py={6}>
-                      <Text color="gray.500" fontSize="sm">No members found</Text>
-                      <Text color="gray.600" fontSize="xs">Members will appear here</Text>
+                      <Text color="gray.500" fontSize="sm">No recent activity</Text>
+                      <Text color="gray.600" fontSize="xs">Activity will appear here</Text>
                     </Box>
                   )}
                 </Box>

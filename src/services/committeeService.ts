@@ -28,6 +28,13 @@ class CommitteeService {
     return data;
   }
 
+  // GET /api/comittes/my/{memberId}
+  // Returns all committees where user is either a member or owner
+  async getMyCommittees(memberId: number): Promise<ComitteResponseDTO[]> {
+    const { data } = await this.api.get<ComitteResponseDTO[]>(`/comittes/my/${memberId}`);
+    return data;
+  }
+
   // GET /api/comittes/{id}
   async getById(id: number): Promise<ComitteResponseDTO> {
     const { data } = await this.api.get<ComitteResponseDTO>(`/comittes/${id}`);

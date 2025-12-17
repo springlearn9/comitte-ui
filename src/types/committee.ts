@@ -22,6 +22,7 @@ export interface CommitteeListItem {
   id: string;
   name: string;
   owner: string;
+  ownerId: number;
   members: number;
   description: string;
   createdAt: string;
@@ -68,6 +69,7 @@ export const mapResponseToListItem = (r: ComitteResponseDTO): CommitteeListItem 
   id: String(r.comitteId),
   name: r.calculatedComitteName ?? r.comitteName,
   owner: (r.ownerName && r.ownerName.trim().length > 0) ? r.ownerName : String(r.ownerId),
+  ownerId: r.ownerId,
   members: r.membersCount ?? 0,
   description: '',
   createdAt: r.startDate ?? '',

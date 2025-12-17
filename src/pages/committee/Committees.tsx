@@ -137,13 +137,13 @@ const CommitteeGroup: React.FC<{
 );
 
 const Committees: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'my-committees' | 'owned-committees'>('my-committees');
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+  const [activeTab, setActiveTab] = useState<'my-committees'>('my-committees');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
   const [selectedCommittee, setSelectedCommittee] = useState<Committee | null>(null);
   const [memberCommittees, setMemberCommittees] = useState<CommitteeListItem[]>([]);
   const [ownerCommittees, setOwnerCommittees] = useState<CommitteeListItem[]>([]);
+  const [myCommittees, setMyCommittees] = useState<CommitteeListItem[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
@@ -210,18 +210,17 @@ const Committees: React.FC = () => {
         if (!Number.isFinite(effectiveMemberId) || effectiveMemberId <= 0) return;
         setLoading(true);
         setError(null);
-        const [memberData, ownerData] = await Promise.all([
+        const [memberData, ownerData, myData] = await Promise.all([
           committeeService.getByMember(effectiveMemberId),
           committeeService.getByOwner(effectiveMemberId),
+          committeeService.getMyCommittees(effectiveMemberId),
         ]);
         const memberItems = memberData.map(mapResponseToListItem);
         const ownerItems = ownerData.map(mapResponseToListItem);
+        const myItems = myData.map(mapResponseToListItem);
         setMemberCommittees(memberItems);
         setOwnerCommittees(ownerItems);
-        // If no member committees but there are owned committees, switch tab for visibility
-        if (memberItems.length === 0 && ownerItems.length > 0) {
-          setActiveTab('owned-committees');
-        }
+        setMyCommittees(myItems);
       } catch (e: any) {
         console.error('Failed to load committees', e);
         setError(e?.message || 'Failed to load committees');
@@ -234,24 +233,8 @@ const Committees: React.FC = () => {
 
   // const currentUser = String(user?.id ?? '');
 
-  // Group member committees by owner for "My Committees" tab
-  const groupedCommittees = memberCommittees.reduce((groups, committee) => {
-    const owner = committee.owner || 'Unknown';
-    if (!groups[owner]) {
-      groups[owner] = [];
-    }
-    groups[owner].push(committee);
-    return groups;
-  }, {} as Record<string, CommitteeListItem[]>);
-
   // Owned committees are loaded separately
   const myOwnedCommittees = ownerCommittees;
-
-  const toggleGroup = (owner: string) => {
-    const next = new Set(expandedGroups);
-    if (next.has(owner)) next.delete(owner); else next.add(owner);
-    setExpandedGroups(next);
-  };
 
   const handleCreateCommittee = () => {
     setModalMode('create');
@@ -409,7 +392,7 @@ const Committees: React.FC = () => {
       <Tabs.Root
         value={activeTab}
         onValueChange={(details: { value: string }) =>
-          setActiveTab(details.value === 'my-committees' ? 'my-committees' : 'owned-committees')
+          setActiveTab('my-committees')
         }
       >
         <Tabs.List
@@ -440,28 +423,6 @@ const Committees: React.FC = () => {
           >
             My Committees
           </Tabs.Trigger>
-          <Tabs.Trigger
-            value="owned-committees"
-            px={3}
-            py={2}
-            roundedTop="md"
-            bg="transparent"
-            fontWeight="semibold"
-            color="gray.400"
-            borderWidth="1px"
-            borderColor="transparent"
-            borderBottomColor="transparent"
-            _hover={{ color: 'gray.300' }}
-            css={{
-              '&[data-selected]': {
-                color: 'white',
-                borderColor: 'var(--chakra-colors-gray-700)',
-                borderBottomColor: 'transparent',
-              },
-            }}
-          >
-            Owned Committees
-          </Tabs.Trigger>
           {/* No indicator; active tab overlaps bottom border for enclosed style */}
         </Tabs.List>
 
@@ -469,32 +430,9 @@ const Committees: React.FC = () => {
         {error && <Text color="red.400">{error}</Text>}
 
         <Tabs.Content value="my-committees" paddingX={0}>
-          <Text color="gray.400" mb={4}>
-            Committees you are part of, grouped by owner ({Object.keys(groupedCommittees).length} owners)
-          </Text>
-          {Object.keys(groupedCommittees).length === 0 && !loading && !error && (
-            <Text color="gray.500">You're not part of any committees yet.</Text>
-          )}
-          {Object.entries(groupedCommittees).map(([owner, committees]) => (
-            <CommitteeGroup
-              key={owner}
-              owner={owner}
-              committees={committees}
-              isExpanded={expandedGroups.has(owner)}
-              onToggle={() => toggleGroup(owner)}
-              onEdit={handleEditCommittee}
-              onDelete={handleDeleteCommittee}
-              onShowMembers={openMembers}
-              onShowBids={openBids}
-              onAddMembers={openAddMembers}
-            />
-          ))}
-        </Tabs.Content>
-
-        <Tabs.Content value="owned-committees" paddingX={0}>
           <Box display="flex" alignItems="center" justifyContent="space-between" mb={4}>
             <Text color="gray.400">
-              Committees you own ({myOwnedCommittees.length} committees)
+              All your committees ({myCommittees.length} committees)
             </Text>
             <Button 
               colorPalette="gray" 
@@ -511,22 +449,25 @@ const Committees: React.FC = () => {
               Add Committee
             </Button>
           </Box>
-          {myOwnedCommittees.length === 0 && !loading && !error && (
-            <Text color="gray.500">You don't own any committees yet. Use the "Add Committee" button to create one.</Text>
+          {myCommittees.length === 0 && !loading && !error && (
+            <Text color="gray.500">You're not part of any committees yet.</Text>
           )}
           <Stack gap={3}>
-            {myOwnedCommittees.map((committee) => (
-              <CommitteeRow
-                key={committee.id}
-                committee={committee}
-                canManage
-                onEdit={handleEditCommittee}
-                onDelete={handleDeleteCommittee}
-                onShowMembers={openMembers}
-                onShowBids={openBids}
-                onAddMembers={openAddMembers}
-              />
-            ))}
+            {myCommittees.map((committee) => {
+              const isOwner = committee.ownerId === effectiveMemberId;
+              return (
+                <CommitteeRow
+                  key={committee.id}
+                  committee={committee}
+                  canManage={isOwner}
+                  onEdit={handleEditCommittee}
+                  onDelete={handleDeleteCommittee}
+                  onShowMembers={openMembers}
+                  onShowBids={openBids}
+                  onAddMembers={isOwner ? openAddMembers : undefined}
+                />
+              );
+            })}
           </Stack>
         </Tabs.Content>
       </Tabs.Root>
