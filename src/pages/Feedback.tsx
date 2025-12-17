@@ -61,11 +61,11 @@ const Feedback: React.FC = () => {
 
   return (
     <Box p={6}>
-      <Box mb={6}>
-        <Text as="h1" fontSize="2xl" fontWeight="bold" color="white" mb={2}>
+      <Box mb={4}>
+        <Text as="h1" fontSize="xl" fontWeight="bold" color="white" mb={1}>
           Feedback
         </Text>
-        <Text color="gray.400" fontSize="lg">
+        <Text color="gray.400" fontSize="sm">
           Help us improve Comitte by sharing your thoughts and suggestions
         </Text>
       </Box>

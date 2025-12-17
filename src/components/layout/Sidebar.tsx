@@ -68,20 +68,20 @@ const Sidebar: React.FC = () => {
       minH="100vh"
     >
       {/* Logo */}
-      <Box p={{ base: 3, md: 6 }} borderBottomWidth="1px" borderColor="gray.800">
+      <Box p={{ base: 3, md: 4 }} borderBottomWidth="1px" borderColor="gray.800">
         <Link to="/dashboard">
-          <Box display="flex" alignItems="center" justifyContent={{ base: 'center', md: 'flex-start' }} gap={3} _hover={{ opacity: 0.8 }}>
-            <Box w={8} h={8} bg="red.600" rounded="md" display="flex" alignItems="center" justifyContent="center" flexShrink={0}>
-              <Text color="white" fontWeight="bold" fontSize="sm">C</Text>
+          <Box display="flex" alignItems="center" justifyContent={{ base: 'center', md: 'flex-start' }} gap={2} _hover={{ opacity: 0.8 }}>
+            <Box w={7} h={7} bg="red.600" rounded="md" display="flex" alignItems="center" justifyContent="center" flexShrink={0}>
+              <Text color="white" fontWeight="bold" fontSize="xs">C</Text>
             </Box>
-            <Text display={{ base: 'none', md: 'block' }} fontSize="xl" fontWeight="bold" color="white">Comitte</Text>
+            <Text display={{ base: 'none', md: 'block' }} fontSize="md" fontWeight="bold" color="white">Comitte</Text>
           </Box>
         </Link>
       </Box>
 
       {/* Navigation */}
-      <Box as="nav" flex="1" py={{ base: 3, md: 6 }}>
-        <Box display="flex" flexDirection="column" gap={2} px={{ base: 2, md: 4 }}>
+      <Box as="nav" flex="1" py={{ base: 2, md: 4 }}>
+        <Box display="flex" flexDirection="column" gap={1} px={{ base: 2, md: 3 }}>
           {navItems.map((item) => (
             <Link key={item.path} to={item.path} title={item.label}>
               <Box
@@ -89,8 +89,8 @@ const Sidebar: React.FC = () => {
                 alignItems="center"
                 justifyContent={{ base: 'center', md: 'flex-start' }}
                 gap={3}
-                px={{ base: 2, md: 4 }}
-                py={3}
+                px={{ base: 2, md: 3 }}
+                py={2}
                 rounded="full"
                 transition="all 0.2s"
                 bg={isActive(item.path) ? 'gray.700' : 'transparent'}
@@ -100,7 +100,7 @@ const Sidebar: React.FC = () => {
                 <Box display="flex" alignItems="center" justifyContent="center" w={5} h={5} flexShrink={0}>
                   {item.icon}
                 </Box>
-                <Text display={{ base: 'none', md: 'block' }} fontWeight="medium">{item.label}</Text>
+                <Text display={{ base: 'none', md: 'block' }} fontWeight="medium" fontSize="sm">{item.label}</Text>
               </Box>
             </Link>
           ))}
@@ -108,15 +108,15 @@ const Sidebar: React.FC = () => {
       </Box>
 
       {/* Bottom section */}
-      <Box p={{ base: 2, md: 4 }} borderTopWidth="1px" borderColor="gray.800">
+      <Box p={{ base: 2, md: 3 }} borderTopWidth="1px" borderColor="gray.800">
         <Box
           onClick={logout}
           display="flex"
           alignItems="center"
           justifyContent={{ base: 'center', md: 'flex-start' }}
           gap={3}
-          px={{ base: 2, md: 4 }}
-          py={3}
+          px={{ base: 2, md: 3 }}
+          py={2}
           rounded="full"
           color="red.400"
           _hover={{ color: 'red.300', bg: 'red.500/10' }}
@@ -126,7 +126,7 @@ const Sidebar: React.FC = () => {
           <Box display="flex" alignItems="center" justifyContent="center" w={5} h={5} flexShrink={0}>
             <LogOut className="w-5 h-5" />
           </Box>
-          <Text display={{ base: 'none', md: 'block' }} fontWeight="medium">Logout</Text>
+          <Text display={{ base: 'none', md: 'block' }} fontWeight="medium" fontSize="sm">Logout</Text>
         </Box>
       </Box>
     </Box>

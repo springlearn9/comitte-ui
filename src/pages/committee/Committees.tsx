@@ -39,42 +39,42 @@ const CommitteeRow: React.FC<{ committee: CommitteeListItem; canManage?: boolean
   const rightDate = formatDate(committee.createdAt);
   const bidsRatio = committee.bidsRatio;
   return (
-    <Box bg="gray.900" borderColor="gray.800" borderWidth="1px" rounded="lg" p={3} _hover={{ bg: 'gray.800' }}>
-      <Box display="flex" alignItems="center" justifyContent="space-between" gap={3}>
+    <Box bg="gray.900" borderColor="gray.800" borderWidth="1px" rounded="lg" p={2} _hover={{ bg: 'gray.800' }}>
+      <Box display="flex" alignItems="center" justifyContent="space-between" gap={2}>
         {/* Left: condensed calculated name */}
-        <Text color="white" fontWeight="medium" lineClamp={1}>
+        <Text color="white" fontWeight="medium" lineClamp={1} fontSize="sm">
           {committee.name}
         </Text>
         {/* Right: bidsRatio • date • amount */}
-        <Box display="flex" alignItems="center" gap={4}>
+        <Box display="flex" alignItems="center" gap={3}>
           {bidsRatio && (
-            <Box bg="gray.700" color="gray.100" px={2} py={0.5} rounded="full" fontSize="xs" minW={6} textAlign="center">
+            <Box bg="gray.700" color="gray.100" px={1.5} py={0.5} rounded="full" fontSize="xs" minW={5} textAlign="center">
               {bidsRatio}
             </Box>
           )}
-          <Text color="gray.400" fontSize="sm">{rightDate}</Text>
-          <Text color="white" fontWeight="semibold">{rightAmount}</Text>
+          <Text color="gray.400" fontSize="xs">{rightDate}</Text>
+          <Text color="white" fontWeight="semibold" fontSize="sm">{rightAmount}</Text>
           <Box as="button" onClick={() => onShowMembers?.(committee)} title="Members"
-               color="blue.300" _hover={{ color: 'blue.200', bg: 'gray.700' }} p={2} cursor="pointer" borderRadius="full">
-            <Users size={20} />
+               color="blue.300" _hover={{ color: 'blue.200', bg: 'gray.700' }} p={1.5} cursor="pointer" borderRadius="full">
+            <Users size={18} />
           </Box>
           <Box as="button" onClick={() => onShowBids?.(committee)} title="Bids"
-               color="blue.300" _hover={{ color: 'blue.200', bg: 'gray.700' }} p={2} cursor="pointer" borderRadius="full">
-            <IndianRupee size={20} />
+               color="blue.300" _hover={{ color: 'blue.200', bg: 'gray.700' }} p={1.5} cursor="pointer" borderRadius="full">
+            <IndianRupee size={18} />
           </Box>
           {canManage && (
             <Box as="button" onClick={() => onAddMembers?.(committee)} title="Add Members"
-                 color="green.300" _hover={{ color: 'green.200', bg: 'gray.700' }} p={2} cursor="pointer" borderRadius="full">
-              <UserPlus size={20} />
+                 color="green.300" _hover={{ color: 'green.200', bg: 'gray.700' }} p={1.5} cursor="pointer" borderRadius="full">
+              <UserPlus size={18} />
             </Box>
           )}
           {canManage && (
-            <Box display="inline-flex" gap={2} ml={2}>
-              <Box as="button" onClick={() => onEdit?.(committee)} title="Edit" p={2} _hover={{ bg: 'gray.700', color: 'blue.300' }} rounded="full" color="blue.400" cursor="pointer">
-                <Edit size={20} />
+            <Box display="inline-flex" gap={1.5} ml={1.5}>
+              <Box as="button" onClick={() => onEdit?.(committee)} title="Edit" p={1.5} _hover={{ bg: 'gray.700', color: 'blue.300' }} rounded="full" color="blue.400" cursor="pointer">
+                <Edit size={18} />
               </Box>
-              <Box as="button" onClick={() => committee.id && onDelete?.(committee.id)} title="Delete" p={2} _hover={{ bg: 'gray.700', color: 'red.300' }} rounded="full" color="red.400" cursor="pointer">
-                <Trash2 size={20} />
+              <Box as="button" onClick={() => committee.id && onDelete?.(committee.id)} title="Delete" p={1.5} _hover={{ bg: 'gray.700', color: 'red.300' }} rounded="full" color="red.400" cursor="pointer">
+                <Trash2 size={18} />
               </Box>
             </Box>
           )}
@@ -380,10 +380,10 @@ const Committees: React.FC = () => {
 
   return (
     <Box p={6}>
-      <Box display="flex" alignItems="center" justifyContent="space-between" mb={6}>
+      <Box display="flex" alignItems="center" justifyContent="space-between" mb={4}>
         <Box>
-          <Text as="h1" fontSize="2xl" fontWeight="bold" color="white" mb={2}>Committees</Text>
-          <Text color="gray.400">Manage and view all committees</Text>
+          <Text as="h1" fontSize="xl" fontWeight="bold" color="white" mb={1}>Committees</Text>
+          <Text color="gray.400" fontSize="sm">Manage and view all committees</Text>
         </Box>
         {/* Button moved to Owned tab header below */}
       </Box>
@@ -399,7 +399,7 @@ const Committees: React.FC = () => {
         {error && <Text color="red.400">{error}</Text>}
 
         <Tabs.Content value="my-committees" paddingX={0}>
-          <Box display="flex" alignItems="center" justifyContent="flex-end" mb={4}>
+          <Box display="flex" alignItems="center" justifyContent="flex-end" mb={3}>
             <Button 
               colorPalette="gray" 
               variant="outline" 
@@ -410,15 +410,16 @@ const Committees: React.FC = () => {
               _hover={{ bg: 'white', color: 'black', borderColor: 'gray.400' }}
               transition="all 0.2s"
               onClick={handleCreateCommittee}
+              size="sm"
             >
-              <Box mr={2} display="inline-flex"><Plus size={16} /></Box>
+              <Box mr={1.5} display="inline-flex"><Plus size={14} /></Box>
               Add Committee
             </Button>
           </Box>
           {myCommittees.length === 0 && !loading && !error && (
             <Text color="gray.500">You're not part of any committees yet.</Text>
           )}
-          <Stack gap={3}>
+          <Stack gap={2}>
             {myCommittees.map((committee) => {
               const isOwner = committee.ownerId === effectiveMemberId;
               return (

@@ -246,10 +246,10 @@ const UserProfile: React.FC = () => {
           <ArrowLeft size={16} />
         </Button>
         <Box>
-          <Text as="h1" fontSize="2xl" fontWeight="bold" color="white" mb={1}>
+          <Text as="h1" fontSize="xl" fontWeight="bold" color="white" mb={1}>
             Profile Settings
           </Text>
-          <Text color="gray.400" fontSize="md">
+          <Text color="gray.400" fontSize="sm">
             Manage your account settings and preferences
           </Text>
         </Box>

@@ -177,21 +177,21 @@ const AppGallery: React.FC = () => {
   };
 
   return (
-    <Box p={6}>
-      <Box mb={6}>
-        <Text as="h1" fontSize="2xl" fontWeight="bold" color="white" mb={2}>
+    <Box p={4}>
+      <Box mb={4}>
+        <Text as="h1" fontSize="xl" fontWeight="bold" color="white" mb={1}>
           App Gallery
         </Text>
-        <Text color="gray.400" fontSize="lg">
+        <Text color="gray.400" fontSize="sm">
           Explore and download Comitte applications and extensions
         </Text>
       </Box>
 
       {/* Filters */}
-      <Box bg="gray.900" borderColor="gray.800" borderWidth="1px" rounded="lg" p={4} mb={6}>
-        <Box display="grid" gridTemplateColumns={{ base: '1fr', md: 'repeat(3, 1fr)' }} gap={4}>
+      <Box bg="gray.900" borderColor="gray.800" borderWidth="1px" rounded="lg" p={3} mb={4}>
+        <Box display="grid" gridTemplateColumns={{ base: '1fr', md: 'repeat(3, 1fr)' }} gap={3}>
           <Box>
-            <Text color="white" fontSize="sm" fontWeight="medium" mb={2}>
+            <Text color="white" fontSize="xs" fontWeight="medium" mb={1.5}>
               Search Apps
             </Text>
             <Box position="relative">
@@ -213,7 +213,7 @@ const AppGallery: React.FC = () => {
           </Box>
 
           <Box>
-            <Text color="white" fontSize="sm" fontWeight="medium" mb={2}>
+            <Text color="white" fontSize="xs" fontWeight="medium" mb={1.5}>
               Category
             </Text>
             <select
@@ -238,7 +238,7 @@ const AppGallery: React.FC = () => {
           </Box>
 
           <Box>
-            <Text color="white" fontSize="sm" fontWeight="medium" mb={2}>
+            <Text color="white" fontSize="xs" fontWeight="medium" mb={1.5}>
               Platform
             </Text>
             <select
@@ -265,56 +265,56 @@ const AppGallery: React.FC = () => {
       </Box>
 
       {/* Results Count */}
-      <Box mb={4}>
-        <Text color="gray.400" fontSize="sm">
+      <Box mb={3}>
+        <Text color="gray.400" fontSize="xs">
           Found {filteredApps.length} app{filteredApps.length !== 1 ? 's' : ''}
         </Text>
       </Box>
 
       {/* Apps Grid */}
-      <Box display="grid" gridTemplateColumns={{ base: '1fr', lg: 'repeat(2, 1fr)' }} gap={6}>
+      <Box display="grid" gridTemplateColumns={{ base: '1fr', lg: 'repeat(2, 1fr)' }} gap={4}>
         {filteredApps.map((app) => (
-          <Box key={app.id} bg="gray.900" borderColor="gray.800" borderWidth="1px" rounded="lg" p={6}>
+          <Box key={app.id} bg="gray.900" borderColor="gray.800" borderWidth="1px" rounded="lg" p={4}>
             {/* Header */}
-            <Box mb={4}>
-              <Box display="flex" alignItems="start" justifyContent="space-between" mb={3}>
+            <Box mb={3}>
+              <Box display="flex" alignItems="start" justifyContent="space-between" mb={2}>
                 <Box>
                   <Box display="flex" alignItems="center" gap={2} mb={1}>
-                    <Text fontSize="xl" fontWeight="semibold" color="white">
+                    <Text fontSize="md" fontWeight="semibold" color="white">
                       {app.name}
                     </Text>
                     <Badge colorScheme={getStatusColor(app.status)} size="sm">
                       {app.status.toUpperCase()}
                     </Badge>
                   </Box>
-                  <Box display="flex" alignItems="center" gap={4} color="gray.400" fontSize="sm">
+                  <Box display="flex" alignItems="center" gap={3} color="gray.400" fontSize="xs">
                     <Box display="flex" alignItems="center" gap={1}>
                       {getPlatformIcon(app.platform)}
                       <Text>{app.platform === 'all' ? 'All Platforms' : app.platform}</Text>
                     </Box>
                     <Box display="flex" alignItems="center" gap={1}>
-                      <Star size={14} fill="#fbbf24" color="#fbbf24" />
+                      <Star size={12} fill="#fbbf24" color="#fbbf24" />
                       <Text>{app.rating}</Text>
                     </Box>
                     <Box display="flex" alignItems="center" gap={1}>
-                      <Download size={14} />
+                      <Download size={12} />
                       <Text>{app.downloads}</Text>
                     </Box>
                   </Box>
                 </Box>
-                <Box display="flex" alignItems="center" gap={1} color="gray.400" fontSize="sm">
+                <Box display="flex" alignItems="center" gap={1} color="gray.400" fontSize="xs">
                   {getCategoryIcon(app.category)}
                 </Box>
               </Box>
               
-              <Text color="gray.300" fontSize="sm" lineHeight="tall">
+              <Text color="gray.300" fontSize="xs" lineHeight="tall">
                 {app.description}
               </Text>
             </Box>
 
             {/* Features */}
-            <Box mb={4}>
-              <Text color="white" fontSize="sm" fontWeight="medium" mb={2}>
+            <Box mb={3}>
+              <Text color="white" fontSize="xs" fontWeight="medium" mb={1.5}>
                 Key Features
               </Text>
               <Box display="flex" flexWrap="wrap" gap={2}>
@@ -327,19 +327,19 @@ const AppGallery: React.FC = () => {
             </Box>
 
             {/* Footer */}
-            <Box display="flex" alignItems="center" justifyContent="space-between" pt={4} borderTop="1px solid" borderColor="gray.800">
+            <Box display="flex" alignItems="center" justifyContent="space-between" pt={3} borderTop="1px solid" borderColor="gray.800">
               <Box>
-                <Text color="gray.400" fontSize="xs">
+                <Text color="gray.400" fontSize="2xs">
                   Version {app.version}
                 </Text>
-                <Box display="flex" alignItems="center" gap={1} color="gray.400" fontSize="xs">
-                  <Calendar size={12} />
+                <Box display="flex" alignItems="center" gap={1} color="gray.400" fontSize="2xs">
+                  <Calendar size={10} />
                   <Text>{new Date(app.releaseDate).toLocaleDateString()}</Text>
                 </Box>
               </Box>
               <Box display="flex" gap={2}>
                 <Button
-                  size="sm"
+                  size="xs"
                   variant="outline"
                   colorScheme="gray"
                   bg="gray.600"
@@ -349,19 +349,19 @@ const AppGallery: React.FC = () => {
                   transition="all 0.2s"
                 >
                   <Box display="flex" alignItems="center" gap={1}>
-                    <ExternalLink size={14} />
+                    <ExternalLink size={12} />
                     Details
                   </Box>
                 </Button>
                 <Button
-                  size="sm"
+                  size="xs"
                   colorScheme="blue"
                   bg="blue.600"
                   color="white"
                   _hover={{ bg: 'blue.500' }}
                 >
                   <Box display="flex" alignItems="center" gap={1}>
-                    <Download size={14} />
+                    <Download size={12} />
                     Download
                   </Box>
                 </Button>
@@ -372,11 +372,11 @@ const AppGallery: React.FC = () => {
       </Box>
 
       {filteredApps.length === 0 && (
-        <Box textAlign="center" py={12}>
-          <Text color="gray.400" fontSize="lg">
+        <Box textAlign="center" py={8}>
+          <Text color="gray.400" fontSize="sm">
             No apps found matching your criteria
           </Text>
-          <Text color="gray.500" fontSize="sm" mt={2}>
+          <Text color="gray.500" fontSize="xs" mt={1}>
             Try adjusting your search terms or filters
           </Text>
         </Box>

@@ -118,15 +118,15 @@ const Bids: React.FC = () => {
   };
 
   return (
-    <Box p={6}>
+    <Box p={4}>
       <Box mb={2}>
-        <Text as="h1" fontSize="2xl" fontWeight="bold" color="white">Bids</Text>
+        <Text as="h1" fontSize="xl" fontWeight="bold" color="white">Bids</Text>
       </Box>
-      <Text color="gray.400" mb={6}>Bids grouped by committee with bid amounts and monthly shares (ordered by committee number desc)</Text>
-      {loading && <Text color="gray.400">Loading bids…</Text>}
-      {error && <Text color="red.400">{error}</Text>}
+      <Text color="gray.400" mb={3} fontSize="xs">Bids grouped by committee with bid amounts and monthly shares (ordered by committee number desc)</Text>
+      {loading && <Text color="gray.400" fontSize="xs">Loading bids…</Text>}
+      {error && <Text color="red.400" fontSize="xs">{error}</Text>}
       {/* Grouped by committeeId */}
-      <Stack gap={4}>
+      <Stack gap={3}>
         {Object.entries(groupedBids).map(([cid, list]) => {
           const cidNum = Number(cid);
           const headerName = list[0]?.committeeName ?? `Committee #${cid}`;
@@ -143,7 +143,7 @@ const Bids: React.FC = () => {
                 alignItems="center"
                 justifyContent="space-between"
                 px={2}
-                py={2}
+                py={1.5}
                 cursor="pointer"
                 _hover={{ bg: 'gray.800' }}
                 rounded="md"
@@ -151,14 +151,14 @@ const Bids: React.FC = () => {
               >
                 <Box display="flex" alignItems="center" gap={2} flex="1" minW={0}>
                   <ChevronRight
-                    size={16}
+                    size={14}
                     color="#a3a3a3"
                     style={{ transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.15s ease' }}
                   />
-                  <Text color="white" fontWeight="semibold" lineClamp={1}>{headerName}</Text>
+                  <Text color="white" fontWeight="semibold" fontSize="sm" lineClamp={1}>{headerName}</Text>
                 </Box>
-                <Box display="flex" alignItems="center" gap={3}>
-                  <Text color="gray.400" fontSize="sm">{list.length} bids</Text>
+                <Box display="flex" alignItems="center" gap={2}>
+                  <Text color="gray.400" fontSize="xs">{list.length} bids</Text>
                   <Button
                     size="xs"
                     colorPalette="gray"
@@ -180,24 +180,24 @@ const Bids: React.FC = () => {
                 </Box>
               </Box>
               {isOpen && (
-                <Stack gap={2} mt={2}>
+                <Stack gap={1.5} mt={1.5}>
                   {/* Header row */}
                   <Box
                     display="grid"
                     gridTemplateColumns="36px 110px 1fr 120px 120px 60px"
                     alignItems="center"
-                    gap={3}
-                    px={3}
-                    py={1}
-                    borderBottom="1px solid"
-                    borderColor="gray.700"
-                  >
-                    <Text color="gray.500" fontSize="xs" textAlign="center">#</Text>
-                    <Text color="gray.500" fontSize="xs">Date</Text>
-                    <Text color="gray.500" fontSize="xs">Bidder</Text>
-                    <Text color="gray.500" fontSize="xs" textAlign="right">Bid Amount</Text>
-                    <Text color="gray.500" fontSize="xs" textAlign="right">Monthly Share</Text>
-                    <Text color="gray.500" fontSize="xs" textAlign="center">Actions</Text>
+                    gap={2}
+                  px={2}
+                  py={0.5}
+                  borderBottom="1px solid"
+                  borderColor="gray.700"
+                >
+                  <Text color="gray.500" fontSize="2xs" textAlign="center">#</Text>
+                  <Text color="gray.500" fontSize="2xs">Date</Text>
+                  <Text color="gray.500" fontSize="2xs">Bidder</Text>
+                  <Text color="gray.500" fontSize="2xs" textAlign="right">Bid Amount</Text>
+                  <Text color="gray.500" fontSize="2xs" textAlign="right">Monthly Share</Text>
+                  <Text color="gray.500" fontSize="2xs" textAlign="center">Actions</Text>
                   </Box>
                   {list.map((b) => (
                     <Box
@@ -205,26 +205,26 @@ const Bids: React.FC = () => {
                       display="grid"
                       gridTemplateColumns="36px 110px 1fr 120px 120px 60px"
                       alignItems="center"
-                      gap={3}
+                      gap={2}
                       bg="gray.800"
                       rounded="md"
-                      px={3}
-                      py={2}
+                      px={2}
+                      py={1.5}
                     >
                       {/* Col 1: committee number pill */}
-                      <Box bg="gray.700" color="gray.100" px={2} py={0.5} rounded="full" fontSize="xs" textAlign="center">
+                      <Box bg="gray.700" color="gray.100" px={1.5} py={0.5} rounded="full" fontSize="2xs" textAlign="center">
                         {b.committeeNumber ?? '-'}
                       </Box>
                       {/* Col 2: date (ddMonYYYY) */}
-                      <Text color="gray.400" fontSize="sm">{formatDateTime(b.bidDate ?? b.createdAt)}</Text>
+                      <Text color="gray.400" fontSize="xs">{formatDateTime(b.bidDate ?? b.createdAt)}</Text>
                       {/* Col 3: final bidder name (fallback '-') */}
-                      <Text color="gray.300" fontSize="sm" lineClamp={1}>
+                      <Text color="gray.300" fontSize="xs" lineClamp={1}>
                         {b.finalBidderName && b.finalBidderName.trim() !== '' ? b.finalBidderName : '-'}
                       </Text>
                       {/* Col 4: amount right-aligned */}
-                      <Text color="white" fontWeight="semibold" textAlign="right">₹{b.amount}</Text>
+                      <Text color="white" fontWeight="semibold" fontSize="xs" textAlign="right">₹{b.amount}</Text>
                       {/* Col 5: monthly share right-aligned */}
-                      <Text color="green.400" fontWeight="semibold" textAlign="right">
+                      <Text color="green.400" fontWeight="semibold" fontSize="xs" textAlign="right">
                         {b.monthlyShare ? `₹${b.monthlyShare}` : '-'}
                       </Text>
                       {/* Col 6: edit action */}
@@ -235,11 +235,11 @@ const Bids: React.FC = () => {
                           title="Edit Bid"
                           color="blue.300" 
                           _hover={{ color: 'blue.200', bg: 'gray.700' }} 
-                          p={2} 
+                          p={1.5} 
                           cursor="pointer" 
                           borderRadius="full"
                         >
-                          <Edit size={16} />
+                          <Edit size={14} />
                         </Box>
                       </Box>
                     </Box>
@@ -250,7 +250,7 @@ const Bids: React.FC = () => {
           );
         })}
         {!loading && Object.keys(groupedBids).length === 0 && (
-          <Text color="gray.500" fontSize="sm">No bids yet.</Text>
+          <Text color="gray.500" fontSize="xs">No bids yet.</Text>
         )}
       </Stack>
 
