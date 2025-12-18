@@ -4,6 +4,7 @@ import { ChevronRight, Plus, Edit } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { memberService } from '../../services/memberService';
 import { bidService } from '../../services/bidService';
+import { committeeService } from '../../services/committeeService';
 import { mapBidResponse, type Bid } from '../../types/bid';
 import CreateBidModal from './CreateBidModal';
 import EditBidModal from './EditBidModal';
@@ -25,6 +26,8 @@ const Bids: React.FC = () => {
   const [effectiveMemberId, setEffectiveMemberId] = useState<number>(0);
   // Grouped bids by committeeId
   const [groupedBids, setGroupedBids] = useState<Record<number, Bid[]>>({});
+  // Track committee ownership (committeeId -> ownerId)
+  const [committeeOwners, setCommitteeOwners] = useState<Record<number, number>>({});
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -75,6 +78,22 @@ const Bids: React.FC = () => {
           list.sort((a, b) => (b.committeeNumber ?? -Infinity) - (a.committeeNumber ?? -Infinity));
         });
         setGroupedBids(grouped);
+        
+        // Fetch committee details to get owner information
+        const committeeIds = Object.keys(grouped).map(Number);
+        const owners: Record<number, number> = {};
+        await Promise.all(
+          committeeIds.map(async (cid) => {
+            try {
+              const committee = await committeeService.getById(cid);
+              owners[cid] = committee.ownerId;
+            } catch (e) {
+              // If fetch fails, default to not showing buttons
+              owners[cid] = -1;
+            }
+          })
+        );
+        setCommitteeOwners(owners);
       } catch (e: any) {
         setError(e?.message || 'Failed to load bids');
       } finally {
@@ -110,6 +129,21 @@ const Bids: React.FC = () => {
           list.sort((a, b) => (b.committeeNumber ?? -Infinity) - (a.committeeNumber ?? -Infinity));
         });
         setGroupedBids(grouped);
+        
+        // Refresh committee owners
+        const committeeIds = Object.keys(grouped).map(Number);
+        const owners: Record<number, number> = {};
+        await Promise.all(
+          committeeIds.map(async (cid) => {
+            try {
+              const committee = await committeeService.getById(cid);
+              owners[cid] = committee.ownerId;
+            } catch (e) {
+              owners[cid] = -1;
+            }
+          })
+        );
+        setCommitteeOwners(owners);
       } catch (e: any) {
         setError(e?.message || 'Failed to reload bids');
       }
@@ -131,6 +165,7 @@ const Bids: React.FC = () => {
           const cidNum = Number(cid);
           const headerName = list[0]?.committeeName ?? `Committee #${cid}`;
           const isOpen = expanded.has(cidNum);
+          const isOwner = committeeOwners[cidNum] === effectiveMemberId;
           const toggle = () => {
             const next = new Set(expanded);
             if (next.has(cidNum)) next.delete(cidNum); else next.add(cidNum);
@@ -159,24 +194,26 @@ const Bids: React.FC = () => {
                 </Box>
                 <Box display="flex" alignItems="center" gap={2}>
                   <Text color="gray.400" fontSize="xs">{list.length} bids</Text>
-                  <Button
-                    size="xs"
-                    colorPalette="gray"
-                    variant="outline"
-                    rounded="full"
-                    bg="gray.600"
-                    color="white"
-                    borderColor="gray.500"
-                    _hover={{ bg: 'white', color: 'black', borderColor: 'gray.400' }}
-                    transition="all 0.2s"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleCreateBid(cidNum, headerName);
-                    }}
-                  >
-                    <Plus size={12} style={{ marginRight: '4px' }} />
-                    Add Bid
-                  </Button>
+                  {isOwner && (
+                    <Button
+                      size="xs"
+                      colorPalette="gray"
+                      variant="outline"
+                      rounded="full"
+                      bg="gray.600"
+                      color="white"
+                      borderColor="gray.500"
+                      _hover={{ bg: 'white', color: 'black', borderColor: 'gray.400' }}
+                      transition="all 0.2s"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCreateBid(cidNum, headerName);
+                      }}
+                    >
+                      <Plus size={12} style={{ marginRight: '4px' }} />
+                      Add Bid
+                    </Button>
+                  )}
                 </Box>
               </Box>
               {isOpen && (
@@ -229,18 +266,20 @@ const Bids: React.FC = () => {
                       </Text>
                       {/* Col 6: edit action */}
                       <Box display="flex" justifyContent="center">
-                        <Box 
-                          as="button" 
-                          onClick={() => handleEditBid(b)} 
-                          title="Edit Bid"
-                          color="blue.300" 
-                          _hover={{ color: 'blue.200', bg: 'gray.700' }} 
-                          p={1.5} 
-                          cursor="pointer" 
-                          borderRadius="full"
-                        >
-                          <Edit size={14} />
-                        </Box>
+                        {isOwner && (
+                          <Box 
+                            as="button" 
+                            onClick={() => handleEditBid(b)} 
+                            title="Edit Bid"
+                            color="blue.300" 
+                            _hover={{ color: 'blue.200', bg: 'gray.700' }} 
+                            p={1.5} 
+                            cursor="pointer" 
+                            borderRadius="full"
+                          >
+                            <Edit size={14} />
+                          </Box>
+                        )}
                       </Box>
                     </Box>
                   ))}
