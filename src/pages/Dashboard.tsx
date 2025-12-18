@@ -411,16 +411,11 @@ const Dashboard: React.FC = () => {
                       {stats.myCommittees.slice(0, 3).map((committee) => (
                         <Box key={committee.id} p={2} bg="gray.800" rounded="md" borderLeft="3px solid" borderColor="blue.400">
                           <Box display="grid" gridTemplateColumns="2fr 1fr 1fr" gap={3} mb={1.5}>
-                            {/* Row 1 Column 1: Committee Name + Bids Ratio */}
+                            {/* Row 1 Column 1: Committee Name */}
                             <Box display="flex" alignItems="center" gap={2}>
                               <Text color="white" fontSize="xs" fontWeight="medium">
                                 {committee.name}
                               </Text>
-                              {committee.bidsRatio && (
-                                <Box bg="gray.700" color="gray.100" px={1.5} py={0.5} rounded="full" fontSize="xs">
-                                  {committee.bidsRatio}
-                                </Box>
-                              )}
                             </Box>
                             {/* Row 1 Column 2: Full Share */}
                             <Box display="flex" alignItems="center">
@@ -529,11 +524,18 @@ const Dashboard: React.FC = () => {
                               {formatRelativeTime(activity.timestamp)}
                             </Text>
                           </Box>
-                          <Text color="white" fontSize="sm" lineHeight="1.3">
-                            <Text as="span" color="blue.300" fontWeight="medium">{activity.bidderName}</Text>
-                            <Text as="span"> bid </Text>
-                            <Text as="span" color="blue.300" fontWeight="medium">{formatCurrency(activity.amount || 0)}</Text>
-                          </Text>
+                          <Box display="flex" alignItems="center" justifyContent="space-between" gap={2}>
+                            <Text color="white" fontSize="sm" lineHeight="1.3">
+                              <Text as="span" color="blue.300" fontWeight="medium">{activity.bidderName}</Text>
+                              <Text as="span"> bid </Text>
+                              <Text as="span" color="blue.300" fontWeight="medium">{formatCurrency(activity.amount || 0)}</Text>
+                            </Text>
+                            {activity.monthlyShare && (
+                              <Text color="green.400" fontSize="xs" fontWeight="semibold" whiteSpace="nowrap">
+                                ₹{activity.monthlyShare}
+                              </Text>
+                            )}
+                          </Box>
                         </Box>
                       ))}
                     </Stack>
