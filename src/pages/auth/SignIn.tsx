@@ -19,11 +19,13 @@ const SignIn: React.FC = () => {
     
     try {
       await login(username, password);
-      navigate('/dashboard');
+      // Small delay to ensure state is updated before navigation
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 50);
     } catch (err: any) {
       const errorMessage = err.message || 'Login failed. Please check your credentials.';
       setError(errorMessage);
-    } finally {
       setIsLoading(false);
     }
   };
