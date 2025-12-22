@@ -24,8 +24,8 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-// Session timeout in milliseconds (30 seconds)
-const SESSION_TIMEOUT_MS = 30 * 1000;
+// Session timeout in milliseconds (300 seconds)
+const SESSION_TIMEOUT_MS = 300 * 1000;
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
