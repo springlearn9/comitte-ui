@@ -3,6 +3,8 @@ export interface Bid {
   committeeId: number;
   committeeName?: string;
   committeeNumber?: number;
+  ownerId?: number;
+  ownerName?: string;
   finalBidderId: number;
   finalBidderName?: string;
   amount: number; // finalBidAmt
@@ -20,6 +22,8 @@ export interface BidResponseDTO {
   comitteId: number;
   comitteName?: string;
   comitteNumber?: number;
+  ownerId?: number;
+  ownerName?: string;
   finalBidderId: number;
   finalBidderName?: string;
   finalBidAmt: number;
@@ -45,6 +49,8 @@ export const mapBidResponse = (r: BidResponseDTO): Bid => ({
   committeeId: r.comitteId,
   committeeName: r.comitteName,
   committeeNumber: r.comitteNumber,
+  ownerId: r.ownerId,
+  ownerName: r.ownerName,
   finalBidderId: r.finalBidderId,
   finalBidderName: r.finalBidderName,
   amount: r.finalBidAmt,

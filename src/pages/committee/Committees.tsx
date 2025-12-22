@@ -141,8 +141,6 @@ const Committees: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
   const [selectedCommittee, setSelectedCommittee] = useState<Committee | null>(null);
-  const [memberCommittees, setMemberCommittees] = useState<CommitteeListItem[]>([]);
-  const [ownerCommittees, setOwnerCommittees] = useState<CommitteeListItem[]>([]);
   const [myCommittees, setMyCommittees] = useState<CommitteeListItem[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -210,16 +208,8 @@ const Committees: React.FC = () => {
         if (!Number.isFinite(effectiveMemberId) || effectiveMemberId <= 0) return;
         setLoading(true);
         setError(null);
-        const [memberData, ownerData, myData] = await Promise.all([
-          committeeService.getByMember(effectiveMemberId),
-          committeeService.getByOwner(effectiveMemberId),
-          committeeService.getMyCommittees(effectiveMemberId),
-        ]);
-        const memberItems = memberData.map(mapResponseToListItem);
-        const ownerItems = ownerData.map(mapResponseToListItem);
+        const myData = await committeeService.getMyCommittees(effectiveMemberId);
         const myItems = myData.map(mapResponseToListItem);
-        setMemberCommittees(memberItems);
-        setOwnerCommittees(ownerItems);
         setMyCommittees(myItems);
       } catch (e: any) {
         console.error('Failed to load committees', e);
@@ -230,11 +220,6 @@ const Committees: React.FC = () => {
     };
     fetchData();
   }, [effectiveMemberId]);
-
-  // const currentUser = String(user?.id ?? '');
-
-  // Owned committees are loaded separately
-  const myOwnedCommittees = ownerCommittees;
 
   const handleCreateCommittee = () => {
     setModalMode('create');
@@ -332,12 +317,8 @@ const Committees: React.FC = () => {
       // Close modal and refresh data
       setAddMembersModal({ open: false, committee: null, searchText: '', loading: false, searchResults: [] });
       // Refresh committees data
-      const [memberData, ownerData] = await Promise.all([
-        committeeService.getByMember(effectiveMemberId),
-        committeeService.getByOwner(effectiveMemberId),
-      ]);
-      setMemberCommittees(memberData.map(mapResponseToListItem));
-      setOwnerCommittees(ownerData.map(mapResponseToListItem));
+      const myData = await committeeService.getMyCommittees(effectiveMemberId);
+      setMyCommittees(myData.map(mapResponseToListItem));
     } catch (e: any) {
       console.error('Failed to add member:', e);
       console.error('Error response:', e.response?.data);
@@ -351,8 +332,7 @@ const Committees: React.FC = () => {
     if (window.confirm('Are you sure you want to delete this committee?')) {
       committeeService.delete(Number(id))
         .then(() => {
-          setOwnerCommittees(prev => prev.filter(c => c.id !== id));
-          setMemberCommittees(prev => prev.filter(c => c.id !== id));
+          setMyCommittees(prev => prev.filter(c => c.id !== id));
         })
         .catch((e) => {
           console.error('Delete failed', e);
@@ -368,13 +348,12 @@ const Committees: React.FC = () => {
       const payload = mapModalToRequest(committeeData, ownerId);
       const created = await committeeService.create(payload);
       const item = mapResponseToListItem(created);
-      setOwnerCommittees(prev => [...prev, item]);
+      setMyCommittees(prev => [...prev, item]);
     } else if (selectedCommittee?.id) {
       const payload = mapModalToRequest(committeeData, ownerId);
       const updated = await committeeService.update(Number(selectedCommittee.id), payload);
       const item = mapResponseToListItem(updated);
-      setOwnerCommittees(prev => prev.map(c => c.id === item.id ? item : c));
-      setMemberCommittees(prev => prev.map(c => c.id === item.id ? item : c));
+      setMyCommittees(prev => prev.map(c => c.id === item.id ? item : c));
     }
   };
 

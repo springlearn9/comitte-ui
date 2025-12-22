@@ -79,20 +79,13 @@ const Bids: React.FC = () => {
         });
         setGroupedBids(grouped);
         
-        // Fetch committee details to get owner information
-        const committeeIds = Object.keys(grouped).map(Number);
+        // Extract owner information from bid data (no additional API calls needed)
         const owners: Record<number, number> = {};
-        await Promise.all(
-          committeeIds.map(async (cid) => {
-            try {
-              const committee = await committeeService.getById(cid);
-              owners[cid] = committee.ownerId;
-            } catch (e) {
-              // If fetch fails, default to not showing buttons
-              owners[cid] = -1;
-            }
-          })
-        );
+        bids.forEach((bid) => {
+          if (bid.ownerId !== undefined) {
+            owners[bid.committeeId] = bid.ownerId;
+          }
+        });
         setCommitteeOwners(owners);
       } catch (e: any) {
         setError(e?.message || 'Failed to load bids');
@@ -130,19 +123,13 @@ const Bids: React.FC = () => {
         });
         setGroupedBids(grouped);
         
-        // Refresh committee owners
-        const committeeIds = Object.keys(grouped).map(Number);
+        // Extract owner information from bid data
         const owners: Record<number, number> = {};
-        await Promise.all(
-          committeeIds.map(async (cid) => {
-            try {
-              const committee = await committeeService.getById(cid);
-              owners[cid] = committee.ownerId;
-            } catch (e) {
-              owners[cid] = -1;
-            }
-          })
-        );
+        bids.forEach((bid) => {
+          if (bid.ownerId !== undefined) {
+            owners[bid.committeeId] = bid.ownerId;
+          }
+        });
         setCommitteeOwners(owners);
       } catch (e: any) {
         setError(e?.message || 'Failed to reload bids');
