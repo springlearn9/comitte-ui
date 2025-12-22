@@ -1,10 +1,17 @@
 import React from 'react';
 import { Box, Stack, Input, Button, Text } from '@chakra-ui/react';
-import { Search, Bell, Settings, LogOut } from 'lucide-react';
+import { Search, Bell, Settings, LogOut, Clock } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
 const Header: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, sessionTimeRemaining } = useAuth();
+
+  // Format time as MM:SS
+  const formatTime = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
 
   return (
     <Box as="header" bg="gray.900" borderBottomWidth="1px" borderColor="gray.800" px={4} py={3} backdropFilter="auto" backdropBlur="sm">
@@ -28,6 +35,30 @@ const Header: React.FC = () => {
 
         {/* Right side */}
         <Stack direction="row" align="center" gap={2} ml={3}>
+          {/* Session Timer */}
+          {user && (
+            <Box 
+              display="flex" 
+              alignItems="center" 
+              gap={1.5} 
+              px={2.5} 
+              py={1.5} 
+              bg="gray.800" 
+              rounded="md"
+              borderWidth="1px"
+              borderColor={sessionTimeRemaining <= 15 ? 'orange.500' : 'gray.700'}
+            >
+              <Clock size={14} color={sessionTimeRemaining <= 15 ? '#f97316' : '#9ca3af'} />
+              <Text 
+                fontSize="xs" 
+                fontWeight="medium" 
+                color={sessionTimeRemaining <= 15 ? 'orange.400' : 'gray.400'}
+              >
+                Session: {formatTime(sessionTimeRemaining)}
+              </Text>
+            </Box>
+          )}
+
           {/* User Display */}
           <Box display="flex" alignItems="center" gap={2}>
             <Box w={7} h={7} rounded="full" bg="gray.700" borderWidth="2px" borderColor="red.500" display="flex" alignItems="center" justifyContent="center">
