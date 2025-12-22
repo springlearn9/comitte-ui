@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Box, Stack, Heading, Text, SimpleGrid, Badge, Spinner, DialogRoot, DialogBackdrop, DialogPositioner, DialogContent, DialogHeader, DialogBody, DialogFooter, DialogTitle } from '@chakra-ui/react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
@@ -55,9 +55,17 @@ const Dashboard: React.FC = () => {
   const [membersModal, setMembersModal] = useState<{ open: boolean; title: string; loading: boolean; items: CommitteMemberMapResponse[] }>({ open: false, title: '', loading: false, items: []});
   const [bidsModal, setBidsModal] = useState<{ open: boolean; title: string; loading: boolean; items: Bid[] }>({ open: false, title: '', loading: false, items: []});
 
+  // Prevent duplicate calls
+  const loadingRef = useRef(false);
+  const hasLoadedRef = useRef(false);
+
   useEffect(() => {
     const loadDashboardData = async () => {
       if (!user) return;
+      
+      // Prevent duplicate calls when effect runs twice in StrictMode
+      if (loadingRef.current || hasLoadedRef.current) return;
+      loadingRef.current = true;
       
       setLoading(true);
       setError(null);
@@ -96,19 +104,22 @@ const Dashboard: React.FC = () => {
           bidService.getByMember(memberId).catch(() => [])
         ]);
 
-        // Calculate total members across all my committees
-        let totalMembersCount = 0;
-        const memberCounts = await Promise.all(
+        // Fetch actual member counts for each committee to ensure accuracy
+        const memberCountsMap = new Map<number, number>();
+        await Promise.all(
           myCommitteesData.map(async (committee) => {
             try {
               const members = await memberService.getByCommittee(committee.comitteId);
-              return members.length;
+              memberCountsMap.set(committee.comitteId, members.length);
             } catch {
-              return 0;
+              // Fall back to backend's count if fetch fails
+              memberCountsMap.set(committee.comitteId, committee.membersCount || 0);
             }
           })
         );
-        totalMembersCount = memberCounts.reduce((sum, count) => sum + count, 0);
+        
+        // Calculate total members across all my committees using actual counts
+        const totalMembersCount = Array.from(memberCountsMap.values()).reduce((sum, count) => sum + count, 0);
 
         // Generate recent activity from committees and bids
         const recentActivity: Array<{
@@ -179,7 +190,7 @@ const Dashboard: React.FC = () => {
           totalAmount: committee.fullAmount || 0,
           monthlyShare: committee.fullShare || undefined,
           fullShare: committee.fullShare || undefined,
-          membersCount: memberCounts[myCommitteesData.indexOf(committee)] || 0,
+          membersCount: memberCountsMap.get(committee.comitteId) || 0,
           status: 'ACTIVE',
           createdDate: committee.createdTimestamp || new Date().toISOString(),
           startDate: committee.startDate || committee.createdTimestamp || new Date().toISOString(),
@@ -198,6 +209,8 @@ const Dashboard: React.FC = () => {
         setError(err?.message || 'Failed to load dashboard data');
       } finally {
         setLoading(false);
+        loadingRef.current = false;
+        hasLoadedRef.current = true;
       }
     };
 
