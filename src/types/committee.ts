@@ -40,7 +40,7 @@ export interface ComitteRequestDTO {
   comitteName: string;        // required
   startDate?: string;         // ISO date (LocalDate)
   fullAmount?: number;
-  membersCount?: number;
+  totalShares?: number;
   fullShare?: number;
   dueDateDays?: number;
   paymentDateDays?: number;
@@ -54,12 +54,14 @@ export interface ComitteResponseDTO {
   calculatedComitteName?: string;
   startDate?: string; // ISO date
   fullAmount?: number;
-  membersCount?: number;
+  totalShares?: number;
   fullShare?: number;
   dueDateDays?: number;
   paymentDateDays?: number;
   bidsCount?: number;
   bidsRatio?: string | number;
+  associatedSharesCount?: number;
+  associatedMembersCount?: number;
   createdTimestamp?: string;
   updatedTimestamp?: string;
 }
@@ -70,7 +72,7 @@ export const mapResponseToListItem = (r: ComitteResponseDTO): CommitteeListItem 
   name: r.calculatedComitteName ?? r.comitteName,
   owner: (r.ownerName && r.ownerName.trim().length > 0) ? r.ownerName : String(r.ownerId),
   ownerId: r.ownerId,
-  members: r.membersCount ?? 0,
+  members: r.totalShares ?? 0,
   description: '',
   createdAt: r.startDate ?? '',
   budget: r.fullAmount != null ? `₹${r.fullAmount}` : '₹0',
@@ -85,7 +87,7 @@ export const mapModalToRequest = (c: Committee, ownerId: number): ComitteRequest
   comitteName: c.name,
   startDate: c.startDate || undefined,
   fullAmount: c.totalAmount ? Number(c.totalAmount) : undefined,
-  membersCount: c.maxMembers || undefined,
+  totalShares: c.maxMembers || undefined,
   fullShare: c.monthlyAmount ? Number(c.monthlyAmount) : undefined,
   dueDateDays: c.duration ? Number(c.duration) : undefined,
   paymentDateDays: c.paymentDateDays ? Number(c.paymentDateDays) : undefined,

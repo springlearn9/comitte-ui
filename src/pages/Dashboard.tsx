@@ -31,7 +31,7 @@ interface DashboardStats {
     totalAmount: number;
     monthlyShare?: number;
     fullShare?: number;
-    membersCount: number;
+    sharesCount: number;
     status: string;
     createdDate: string;
     startDate: string;
@@ -92,22 +92,10 @@ const Dashboard: React.FC = () => {
           bidService.getByMember(memberId).catch(() => [])
         ]);
 
-        // Fetch actual member counts for each committee to ensure accuracy
-        const memberCountsMap = new Map<number, number>();
-        await Promise.all(
-          myCommitteesData.map(async (committee) => {
-            try {
-              const members = await memberService.getByCommittee(committee.comitteId);
-              memberCountsMap.set(committee.comitteId, members.length);
-            } catch {
-              // Fall back to backend's count if fetch fails
-              memberCountsMap.set(committee.comitteId, committee.membersCount || 0);
-            }
-          })
-        );
-        
-        // Calculate total members across all my committees using actual counts
-        const totalMembersCount = Array.from(memberCountsMap.values()).reduce((sum, count) => sum + count, 0);
+        // Use associatedMembersCount from backend response instead of making additional API calls
+        const totalMembersCount = myCommitteesData.reduce((sum, committee) => {
+          return sum + (committee.associatedMembersCount || committee.totalShares || 0);
+        }, 0);
 
         // Generate recent activity from committees and bids
         const recentActivity: Array<{
@@ -178,7 +166,7 @@ const Dashboard: React.FC = () => {
           totalAmount: committee.fullAmount || 0,
           monthlyShare: committee.fullShare || undefined,
           fullShare: committee.fullShare || undefined,
-          membersCount: memberCountsMap.get(committee.comitteId) || 0,
+          sharesCount: committee.associatedSharesCount || committee.totalShares || 0, // Use associatedSharesCount
           status: 'ACTIVE',
           createdDate: committee.createdTimestamp || new Date().toISOString(),
           startDate: committee.startDate || committee.createdTimestamp || new Date().toISOString(),
@@ -437,9 +425,9 @@ const Dashboard: React.FC = () => {
                               <Text color="gray.500" fontSize="xs" mb={0.5}>Start Date</Text>
                               <Text color="gray.300" fontSize="xs">{formatDate(committee.startDate)}</Text>
                             </Box>
-                            {/* Row 2 Column 2: Members Link */}
+                            {/* Row 2 Column 2: Shares Link */}
                             <Box>
-                              <Text color="gray.500" fontSize="xs" mb={0.5}>Members</Text>
+                              <Text color="gray.500" fontSize="xs" mb={0.5}>Shares</Text>
                               <Box 
                                 as="button" 
                                 onClick={() => openMembers(committee.id, committee.name)} 
@@ -456,7 +444,7 @@ const Dashboard: React.FC = () => {
                                 transition="all 0.2s"
                               >
                                 <Text fontSize="xs" fontWeight="semibold">
-                                  {committee.membersCount}
+                                  {committee.sharesCount}
                                 </Text>
                                 <Users size={14} />
                               </Box>
