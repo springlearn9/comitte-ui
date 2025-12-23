@@ -71,7 +71,7 @@ const UserProfile: React.FC = () => {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [effectiveMemberId, setEffectiveMemberId] = useState<number>(0);
 
-  // Resolve member ID similar to other components
+  // Resolve member ID - user.id is already set to memberId from login
   useEffect(() => {
     const resolveMemberId = async () => {
       if (!user) return;
@@ -80,32 +80,11 @@ const UserProfile: React.FC = () => {
         return Number.isFinite(n) && n > 0 ? n : null;
       };
       
-      // Try to get memberId from user object
-      const m1 = tryParse((user as any)?.memberId ?? (user as any)?.memberID ?? (user as any)?.member?.id);
-      if (m1) {
-        setEffectiveMemberId(m1);
-        return;
+      // User.id is already set to memberId from login response
+      const memberId = tryParse(user.id);
+      if (memberId) {
+        setEffectiveMemberId(memberId);
       }
-      
-      // If not found, search by username
-      try {
-        if (user.username) {
-          const found = await memberService.searchMembers({ username: user.username });
-          if (found?.length) {
-            const m2 = tryParse(found[0].memberId);
-            if (m2) {
-              setEffectiveMemberId(m2);
-              return;
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Error searching for member:', error);
-      }
-      
-      // Fallback to user ID
-      const m3 = tryParse(user.id);
-      if (m3) setEffectiveMemberId(m3);
     };
     
     resolveMemberId();

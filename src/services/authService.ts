@@ -30,7 +30,17 @@ export interface LoginResponse {
   accessToken: string;
   tokenType: string;
   expiresIn: number;
-  user: any;
+  loginUserDetails: {
+    memberId: number;
+    username: string;
+    email: string;
+    name: string;
+    mobile?: string;
+    grantedRoleIds: number[];
+    grantedRoleNames: string[];
+    grantedAuthorities: string[];
+    allRolesAndAuthorities: Array<{ authority: string }>;
+  };
 }
 
 export interface MemberResponse {
@@ -102,7 +112,18 @@ class AuthService {
       };
       
       const response = await this.apiClient.post<LoginResponse>('/auth/login', loginRequest);
-      const { accessToken, user } = response.data;
+      const { accessToken, loginUserDetails } = response.data;
+      
+      // Map loginUserDetails to User format for frontend
+      const user = {
+        id: loginUserDetails.memberId,
+        username: loginUserDetails.username,
+        email: loginUserDetails.email,
+        roles: loginUserDetails.grantedRoleNames,
+        name: loginUserDetails.name,
+        mobile: loginUserDetails.mobile,
+        authorities: loginUserDetails.grantedAuthorities
+      };
       
       localStorage.setItem(this.tokenKey, accessToken);
       localStorage.setItem(this.userKey, JSON.stringify(user));

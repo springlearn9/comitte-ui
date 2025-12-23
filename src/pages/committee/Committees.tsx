@@ -152,7 +152,7 @@ const Committees: React.FC = () => {
   const [bidsModal, setBidsModal] = useState<{ open: boolean; title: string; loading: boolean; items: Bid[] }>({ open: false, title: '', loading: false, items: []});
   const [addMembersModal, setAddMembersModal] = useState<{ open: boolean; committee: CommitteeListItem | null; searchText: string; loading: boolean; searchResults: MemberResponse[] }>({ open: false, committee: null, searchText: '', loading: false, searchResults: [] });
 
-  // Resolve the memberId/ownerId used by backend; prefer 'memberId' from user, then search by username, then user.id
+  // Resolve the memberId/ownerId used by backend - user.id is already set to memberId from login
   useEffect(() => {
     const resolveMemberId = async () => {
       if (!user) return;
@@ -162,41 +162,17 @@ const Committees: React.FC = () => {
           return Number.isFinite(n) && n > 0 ? n : null;
         };
 
-        // Prefer explicit memberId if present on the user payload
-        const possibleMemberId = (user as any)?.memberId ?? (user as any)?.memberID ?? (user as any)?.member?.id;
-        const m1 = tryParseId(possibleMemberId);
-        if (m1) {
-          setEffectiveMemberId(m1);
-          console.debug('[Committees] Using memberId from user payload:', m1);
+        // User.id is already set to memberId from login response
+        const memberId = tryParseId(user.id);
+        if (memberId) {
+          setEffectiveMemberId(memberId);
+          console.debug('[Committees] Using memberId from user.id:', memberId);
           return;
         }
 
-        // Search by username to resolve the backend member id
-        if (user.username) {
-          const results = await memberService.searchMembers({ username: user.username });
-          if (results?.length) {
-            const m2 = tryParseId(results[0].memberId);
-            if (m2) {
-              setEffectiveMemberId(m2);
-              console.debug('[Committees] Resolved memberId via search:', m2);
-              return;
-            }
-          }
-        }
-
-        // Fallback to auth user id
-        const m3 = tryParseId(user.id);
-        if (m3) {
-          setEffectiveMemberId(m3);
-          console.debug('[Committees] Falling back to user.id as memberId:', m3);
-          return;
-        }
-
-        console.warn('[Committees] Unable to resolve a valid member id from user or search', { user });
+        console.warn('[Committees] Unable to resolve a valid member id from user', { user });
       } catch (e) {
-        console.warn('Failed to resolve member id via search, falling back to auth id', e);
-        const n = Number(user?.id);
-        if (Number.isFinite(n) && n > 0) setEffectiveMemberId(n);
+        console.warn('Failed to resolve member id', e);
       }
     };
     resolveMemberId();

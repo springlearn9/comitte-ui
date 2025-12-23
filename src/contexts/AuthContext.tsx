@@ -129,7 +129,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (username: string, password: string): Promise<boolean> => {
     try {
       const response = await authService.login(username, password);
-      setUser(response.user);
+      // Extract user from loginUserDetails
+      const user = {
+        id: response.loginUserDetails.memberId,
+        username: response.loginUserDetails.username,
+        email: response.loginUserDetails.email,
+        roles: response.loginUserDetails.grantedRoleNames
+      };
+      setUser(user);
+      resetTimeout(); // Start session timer
       return true;
     } catch (error) {
       console.error('Login failed:', error);

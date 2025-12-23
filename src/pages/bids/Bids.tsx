@@ -34,26 +34,16 @@ const Bids: React.FC = () => {
   const [createBidModal, setCreateBidModal] = useState<{ open: boolean; committeeId?: number; committeeName?: string }>({ open: false });
   const [editBidModal, setEditBidModal] = useState<{ open: boolean; bid: Bid | null }>({ open: false, bid: null });
 
-  // Resolve member id similar to Committees page
+  // Resolve member id - user.id is already set to memberId from login
   useEffect(() => {
     const resolveMemberId = async () => {
       if (!user) return;
       const tryParse = (v: any) => {
         const n = Number(v); return Number.isFinite(n) && n > 0 ? n : null;
       };
-      const m1 = tryParse((user as any)?.memberId ?? (user as any)?.memberID ?? (user as any)?.member?.id);
-      if (m1) return setEffectiveMemberId(m1);
-      try {
-        if (user.username) {
-          const found = await memberService.searchMembers({ username: user.username });
-          if (found?.length) {
-            const m2 = tryParse(found[0].memberId);
-            if (m2) return setEffectiveMemberId(m2);
-          }
-        }
-      } catch {}
-      const m3 = tryParse(user.id);
-      if (m3) setEffectiveMemberId(m3);
+      // User.id is already set to memberId from login response
+      const memberId = tryParse(user.id);
+      if (memberId) setEffectiveMemberId(memberId);
     };
     resolveMemberId();
   }, [user]);

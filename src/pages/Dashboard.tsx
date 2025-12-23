@@ -71,27 +71,15 @@ const Dashboard: React.FC = () => {
       setError(null);
       
       try {
-        // Get member ID
+        // Get member ID directly from user object (which has memberId as id)
         let memberId: number | null = null;
         const tryParse = (v: any) => {
           const n = Number(v);
           return Number.isFinite(n) && n > 0 ? n : null;
         };
         
-        memberId = tryParse((user as any)?.memberId ?? (user as any)?.memberID ?? (user as any)?.member?.id);
-        
-        if (!memberId && user.username) {
-          try {
-            const found = await memberService.searchMembers({ username: user.username });
-            if (found?.length) {
-              memberId = tryParse(found[0].memberId);
-            }
-          } catch {}
-        }
-        
-        if (!memberId) {
-          memberId = tryParse(user.id);
-        }
+        // User.id is already set to memberId from login response
+        memberId = tryParse(user.id);
 
         if (!memberId) {
           setError('Unable to determine member ID');
