@@ -54,14 +54,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     lastActivityRef.current = Date.now();
     setSessionTimeRemaining(SESSION_TIMEOUT_MS / 1000);
 
-    // Only set timeout if user is authenticated
-    if (user) {
-      timeoutRef.current = setTimeout(() => {
-        console.log('Session timeout - logging out due to inactivity');
-        logout();
-      }, SESSION_TIMEOUT_MS);
-    }
-  }, [user, logout]);
+    // Set timeout that will trigger logout
+    timeoutRef.current = setTimeout(() => {
+      console.log('Session timeout - logging out due to inactivity');
+      logout();
+    }, SESSION_TIMEOUT_MS);
+  }, [logout]);
 
   useEffect(() => {
     const initAuth = async () => {
