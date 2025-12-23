@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { authService, type MemberResponse, type CommitteMemberMapResponse } from './authService';
+import { sessionRefresh } from '../utils/sessionRefresh';
 
 class MemberService {
   private api = axios.create({
@@ -13,6 +14,14 @@ class MemberService {
       if (token) config.headers.Authorization = `Bearer ${token}`;
       return config;
     });
+
+    this.api.interceptors.response.use(
+      (response) => {
+        sessionRefresh.refresh();
+        return response;
+      },
+      (error) => Promise.reject(error)
+    );
   }
 
   async searchMembers(params: { name?: string; mobile?: string; username?: string }): Promise<MemberResponse[]> {

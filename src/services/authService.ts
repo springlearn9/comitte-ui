@@ -1,5 +1,6 @@
 import axios from 'axios';
 import type { User } from '../contexts/AuthContext';
+import { sessionRefresh } from '../utils/sessionRefresh';
 
 // API Request/Response interfaces matching backend DTOs
 export interface LoginRequest {
@@ -79,7 +80,10 @@ class AuthService {
 
     // Add response interceptor for error handling
     this.apiClient.interceptors.response.use(
-      (response) => response,
+      (response) => {
+        sessionRefresh.refresh();
+        return response;
+      },
       (error) => {
         if (error.response?.status === 401) {
           this.logout();

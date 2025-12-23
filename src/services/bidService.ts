@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { authService } from './authService';
 import type { BidResponseDTO, BidRequest } from '../types/bid';
+import { sessionRefresh } from '../utils/sessionRefresh';
 
 class BidService {
   private api = axios.create({
@@ -14,6 +15,14 @@ class BidService {
       if (token) config.headers.Authorization = `Bearer ${token}`;
       return config;
     });
+
+    this.api.interceptors.response.use(
+      (response) => {
+        sessionRefresh.refresh();
+        return response;
+      },
+      (error) => Promise.reject(error)
+    );
   }
 
   // GET /api/comittes/{id}/bids

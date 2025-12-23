@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { authService } from './authService';
 import type { ComitteRequestDTO, ComitteResponseDTO } from '../types/committee';
+import { sessionRefresh } from '../utils/sessionRefresh';
 
 class CommitteeService {
   private api = axios.create({
@@ -14,6 +15,14 @@ class CommitteeService {
       if (token) config.headers.Authorization = `Bearer ${token}`;
       return config;
     });
+
+    this.api.interceptors.response.use(
+      (response) => {
+        sessionRefresh.refresh();
+        return response;
+      },
+      (error) => Promise.reject(error)
+    );
   }
 
   // GET /api/comittes/owner/{ownerId}

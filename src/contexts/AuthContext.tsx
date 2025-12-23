@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import { authService } from '../services/authService';
+import { sessionRefresh } from '../utils/sessionRefresh';
 
 export interface User {
   id: number;
@@ -16,6 +17,7 @@ interface AuthContextType {
   logout: () => void;
   loading: boolean;
   sessionTimeRemaining: number; // in seconds
+  refreshSession: () => void; // Called by services on successful API calls
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -76,9 +78,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
 
     initAuth();
+    
+    // Register session refresh callback
+    sessionRefresh.setCallback(resetTimeout);
+    
+    return () => {
+      sessionRefresh.clear();
+    };
   }, []); // Remove resetTimeout dependency to prevent re-initialization
 
-  // Set up activity listeners when user is authenticated
+  // Set up session timeout when user is authenticated
   useEffect(() => {
     if (!user) {
       // Clean up timeout if user logs out
@@ -97,18 +106,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Set initial timeout
     resetTimeout();
 
-    // Activity events to refresh session
-    const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
-    
-    const handleActivity = () => {
-      resetTimeout();
-    };
-
-    // Add event listeners
-    events.forEach(event => {
-      window.addEventListener(event, handleActivity);
-    });
-
     // Update countdown every second
     intervalRef.current = setInterval(() => {
       const elapsed = Date.now() - lastActivityRef.current;
@@ -122,9 +119,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     // Cleanup
     return () => {
-      events.forEach(event => {
-        window.removeEventListener(event, handleActivity);
-      });
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
@@ -152,6 +146,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     logout,
     loading,
     sessionTimeRemaining,
+    refreshSession: resetTimeout,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
