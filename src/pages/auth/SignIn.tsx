@@ -21,7 +21,7 @@ const SignIn: React.FC = () => {
       await login(username, password);
       // Small delay to ensure state is updated before navigation
       setTimeout(() => {
-        navigate('/dashboard');
+        navigate('/comitte-dashboard');
       }, 50);
     } catch (err: any) {
       const errorMessage = err.message || 'Login failed. Please check your credentials.';

@@ -25,6 +25,11 @@ const Sidebar: React.FC = () => {
   const navItems: NavItem[] = [
     {
       icon: <LayoutDashboard className="w-5 h-5" />,
+      label: 'Comitte Dashboard',
+      path: '/comitte-dashboard',
+    },
+    {
+      icon: <LayoutDashboard className="w-5 h-5" />,
       label: 'Comitte',
       path: '/committees',
     },
@@ -69,7 +74,7 @@ const Sidebar: React.FC = () => {
     >
       {/* Logo */}
       <Box p={{ base: 3, md: 4 }} borderBottomWidth="1px" borderColor="gray.800">
-        <Link to="/dashboard">
+        <Link to="/comitte-dashboard">
           <Box display="flex" alignItems="center" justifyContent={{ base: 'center', md: 'flex-start' }} gap={2} _hover={{ opacity: 0.8 }}>
             <Box w={7} h={7} bg="red.600" rounded="md" display="flex" alignItems="center" justifyContent="center" flexShrink={0}>
               <Text color="white" fontWeight="bold" fontSize="xs">C</Text>

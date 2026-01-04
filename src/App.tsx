@@ -70,7 +70,7 @@ const AppContent: React.FC = () => {
       
       {/* Protected Routes */}
       <Route
-        path="/dashboard"
+        path="/comitte-dashboard"
         element={
           <ProtectedRoute>
             <Dashboard />
