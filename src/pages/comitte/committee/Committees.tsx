@@ -2,14 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { Box, Stack, Text, Button, Tabs, DialogRoot, DialogBackdrop, DialogPositioner, DialogContent, DialogHeader, DialogBody, DialogFooter, DialogTitle, Input } from '@chakra-ui/react';
 import { Plus, Edit, Trash2, ChevronRight, UserPlus, Users, IndianRupee } from 'lucide-react';
 import CreateEditCommitteeModal from './CreateEditCommitteeModal';
-import type { CommitteeListItem, Committee } from '../../types/committee';
-import { committeeService } from '../../services/committeeService';
-import { mapResponseToListItem, mapModalToRequest } from '../../types/committee';
-import { useAuth } from '../../hooks/useAuth';
-import { memberService } from '../../services/memberService';
-import { bidService } from '../../services/bidService';
-import { mapBidResponse, type Bid } from '../../types/bid';
-import type { MemberResponse, CommitteMemberMapResponse } from '../../services/authService';
+import type { CommitteeListItem, Committee } from '../../../types/committee';
+import { committeeService } from '../../../services/committeeService';
+import { mapResponseToListItem, mapModalToRequest } from '../../../types/committee';
+import { useAuth } from '../../../hooks/useAuth';
+import { memberService } from '../../../services/memberService';
+import { bidService } from '../../../services/bidService';
+import { mapBidResponse, type Bid } from '../../../types/bid';
+import type { MemberResponse, CommitteMemberMapResponse } from '../../../services/authService';
 
 
 // Helpers

@@ -39,7 +39,7 @@ interface DashboardStats {
   }>;
 }
 
-const Dashboard: React.FC = () => {
+const ComitteDashboard: React.FC = () => {
   const { user } = useAuth();
   const [stats, setStats] = useState<DashboardStats>({
     totalCommittees: 0,
@@ -648,4 +648,4 @@ const Dashboard: React.FC = () => {
   );
 };
 
-export default Dashboard;
+export default ComitteDashboard;

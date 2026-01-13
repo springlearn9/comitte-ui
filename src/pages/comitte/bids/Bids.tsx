@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Stack, Text, Button } from '@chakra-ui/react';
 import { ChevronRight, Plus, Edit } from 'lucide-react';
-import { useAuth } from '../../hooks/useAuth';
-import { memberService } from '../../services/memberService';
-import { bidService } from '../../services/bidService';
-import { committeeService } from '../../services/committeeService';
-import { mapBidResponse, type Bid } from '../../types/bid';
+import { useAuth } from '../../../hooks/useAuth';
+import { memberService } from '../../../services/memberService';
+import { bidService } from '../../../services/bidService';
+import { committeeService } from '../../../services/committeeService';
+import { mapBidResponse, type Bid } from '../../../types/bid';
 import CreateBidModal from './CreateBidModal';
 import EditBidModal from './EditBidModal';
 

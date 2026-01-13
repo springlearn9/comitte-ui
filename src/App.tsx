@@ -3,9 +3,9 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { NextUIProvider } from '@nextui-org/react';
 import { AuthProvider } from './contexts/AuthContext';
 import { useAuth } from './hooks/useAuth';
-import Dashboard from './pages/Dashboard';
-import Bids from './pages/bids/Bids';
-import { Committees } from './pages/committee';
+import ComitteDashboard from './pages/ComitteDashboard';
+import { Bids } from './pages/comitte/bids';
+import { Committees } from './pages/comitte/committee';
 import { SignIn, SignUp, ForgotPassword, UserRegistration } from './pages/auth';
 import About from './pages/About';
 import Feedback from './pages/Feedback';
@@ -73,7 +73,7 @@ const AppContent: React.FC = () => {
         path="/comitte-dashboard"
         element={
           <ProtectedRoute>
-            <Dashboard />
+            <ComitteDashboard />
           </ProtectedRoute>
         }
       />
@@ -128,6 +128,9 @@ const AppContent: React.FC = () => {
       
       {/* Default redirect */}
       <Route path="/" element={<Navigate to="/auth/signin" replace />} />
+      
+      {/* Catch-all route - redirect any unknown paths to signin */}
+      <Route path="*" element={<Navigate to="/auth/signin" replace />} />
     </Routes>
   );
 };

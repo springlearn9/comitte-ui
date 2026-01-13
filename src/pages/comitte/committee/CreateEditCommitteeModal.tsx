@@ -20,7 +20,7 @@ import {
   DialogTitle,
 } from '@chakra-ui/react';
 import { Info } from 'lucide-react';
-import type { Committee } from '../../types/committee';
+import type { Committee } from '../../../types/committee';
 
 interface CreateEditCommitteeModalProps {
   isOpen: boolean;

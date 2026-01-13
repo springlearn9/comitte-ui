@@ -14,10 +14,10 @@ import {
   DialogFooter,
   DialogTitle
 } from '@chakra-ui/react';
-import type { BidRequest } from '../../types/bid';
-import { bidService } from '../../services/bidService';
-import { memberService } from '../../services/memberService';
-import type { CommitteMemberMapResponse } from '../../services/authService';
+import type { BidRequest } from '../../../types/bid';
+import { bidService } from '../../../services/bidService';
+import { memberService } from '../../../services/memberService';
+import type { CommitteMemberMapResponse } from '../../../services/authService';
 
 interface CreateBidModalProps {
   isOpen: boolean;
