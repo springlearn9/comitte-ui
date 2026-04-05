@@ -4,8 +4,13 @@ import { NextUIProvider } from '@nextui-org/react';
 import { AuthProvider } from './contexts/AuthContext';
 import { useAuth } from './hooks/useAuth';
 import ComitteDashboard from './pages/ComitteDashboard';
+import ConstructionDashboard from './pages/ConstructionDashboard';
 import { Bids } from './pages/comitte/bids';
 import { Committees } from './pages/comitte/committee';
+import { Projects } from './pages/construction/projects';
+import { Materials } from './pages/construction/materials';
+import LabourDetails from './pages/construction/labour/LabourDetails';
+import PaymentDetailsPage from './pages/construction/payments/PaymentDetails';
 import { SignIn, SignUp, ForgotPassword, UserRegistration } from './pages/auth';
 import About from './pages/About';
 import Feedback from './pages/Feedback';
@@ -93,6 +98,49 @@ const AppContent: React.FC = () => {
           </ProtectedRoute>
         }
       />
+      
+      {/* Construction Routes */}
+      <Route
+        path="/construction-dashboard"
+        element={
+          <ProtectedRoute>
+            <ConstructionDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/construction/projects"
+        element={
+          <ProtectedRoute>
+            <Projects />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/construction/materials"
+        element={
+          <ProtectedRoute>
+            <Materials />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/construction/labour"
+        element={
+          <ProtectedRoute>
+            <LabourDetails />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/construction/payments"
+        element={
+          <ProtectedRoute>
+            <PaymentDetailsPage />
+          </ProtectedRoute>
+        }
+      />
+      
       <Route
         path="/about"
         element={

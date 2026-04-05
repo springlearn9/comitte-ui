@@ -7,7 +7,11 @@ import {
   Briefcase,
   BarChart3,
   Grid3X3,
-  User
+  User,
+  Building,
+  Package,
+  Users,
+  CreditCard
 } from 'lucide-react';
 import { Box, Text } from '@chakra-ui/react';
 import { useAuth } from '../../hooks/useAuth';
@@ -37,6 +41,31 @@ const Sidebar: React.FC = () => {
       icon: <FileText className="w-5 h-5" />,
       label: 'Bids',
       path: '/bids',
+    },
+    {
+      icon: <Building className="w-5 h-5" />,
+      label: 'Construction',
+      path: '/construction-dashboard',
+    },
+    {
+      icon: <Building className="w-5 h-5" />,
+      label: 'Projects',
+      path: '/construction/projects',
+    },
+    {
+      icon: <Package className="w-5 h-5" />,
+      label: 'Materials',
+      path: '/construction/materials',
+    },
+    {
+      icon: <Users className="w-5 h-5" />,
+      label: 'Labour',
+      path: '/construction/labour',
+    },
+    {
+      icon: <CreditCard className="w-5 h-5" />,
+      label: 'Payments',
+      path: '/construction/payments',
     },
     {
       icon: <User className="w-5 h-5" />,

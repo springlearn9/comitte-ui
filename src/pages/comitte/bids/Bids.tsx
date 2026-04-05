@@ -129,11 +129,13 @@ const Bids: React.FC = () => {
   };
 
   return (
-    <Box p={4}>
-      <Box mb={2}>
-        <Text as="h1" fontSize="xl" fontWeight="bold" color="white">Bids</Text>
+    <Box p={6}>
+      <Box display="flex" alignItems="center" justifyContent="space-between" mb={4}>
+        <Box>
+          <Text as="h1" fontSize="xl" fontWeight="bold" color="white" mb={1}>Bids</Text>
+          <Text color="gray.400" fontSize="xs">Bids grouped by committee with bid amounts and monthly shares (ordered by committee number desc)</Text>
+        </Box>
       </Box>
-      <Text color="gray.400" mb={3} fontSize="xs">Bids grouped by committee with bid amounts and monthly shares (ordered by committee number desc)</Text>
       {loading && <Text color="gray.400" fontSize="xs">Loading bids…</Text>}
       {error && <Text color="red.400" fontSize="xs">{error}</Text>}
       {/* Grouped by committeeId */}
