@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Stack, Text, Button, Tabs, DialogRoot, DialogBackdrop, DialogPositioner, DialogContent, DialogHeader, DialogBody, DialogFooter, DialogTitle, Input } from '@chakra-ui/react';
-import { Plus, Edit, Trash2, ChevronRight, UserPlus, Users, IndianRupee } from 'lucide-react';
+import { Plus, Edit, Trash2, UserPlus, Users, IndianRupee } from 'lucide-react';
 import CreateEditCommitteeModal from './CreateEditCommitteeModal';
 import type { CommitteeListItem, Committee } from '../../../types/committee';
 import { committeeService } from '../../../services/committeeService';
@@ -83,58 +83,6 @@ const CommitteeRow: React.FC<{ committee: CommitteeListItem; canManage?: boolean
     </Box>
   );
 };
-
-const CommitteeGroup: React.FC<{ 
-  owner: string; 
-  committees: CommitteeListItem[]; 
-  isExpanded: boolean; 
-  onToggle: () => void;
-  onEdit: (committee: CommitteeListItem) => void;
-  onDelete: (id: string) => void;
-  onShowMembers: (committee: CommitteeListItem) => void;
-  onShowBids: (committee: CommitteeListItem) => void;
-  onAddMembers?: (committee: CommitteeListItem) => void;
-}> = ({ owner, committees, isExpanded, onToggle, onEdit, onDelete, onShowMembers, onShowBids, onAddMembers }) => (
-  <Box mb={6} bg="gray.900" borderColor="gray.800" borderWidth="1px" rounded="lg" p={2}>
-    <Box
-      display="flex"
-      alignItems="center"
-      justifyContent="space-between"
-      px={2}
-      py={2}
-      cursor="pointer"
-      _hover={{ bg: 'gray.800' }}
-      rounded="md"
-      onClick={onToggle}
-    >
-      <Box display="flex" alignItems="center" gap={2} flex="1" minW={0}>
-        <ChevronRight
-          size={16}
-          color="#a3a3a3"
-          style={{ transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.15s ease' }}
-        />
-        <Text color="white" fontWeight="semibold" lineClamp={1}>{owner}</Text>
-      </Box>
-      <Text color="gray.400" fontSize="sm">{committees.length} committees</Text>
-    </Box>
-
-    {isExpanded && (
-      <Stack gap={3} mt={2}>
-        {committees.map((committee) => (
-          <CommitteeRow
-            key={committee.id}
-            committee={committee}
-            onEdit={onEdit}
-            onDelete={onDelete}
-            onShowMembers={onShowMembers}
-            onShowBids={onShowBids}
-            onAddMembers={onAddMembers}
-          />
-        ))}
-      </Stack>
-    )}
-  </Box>
-);
 
 const Committees: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'my-committees'>('my-committees');
@@ -346,7 +294,7 @@ const Committees: React.FC = () => {
       {/* Tabs */}
       <Tabs.Root
         value={activeTab}
-        onValueChange={(details: { value: string }) =>
+        onValueChange={() =>
           setActiveTab('my-committees')
         }
       >

@@ -1,11 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Box, Stack, Heading, Text, SimpleGrid, Badge, Spinner, DialogRoot, DialogBackdrop, DialogPositioner, DialogContent, DialogHeader, DialogBody, DialogFooter, DialogTitle } from '@chakra-ui/react';
+import { Box, Stack, Heading, Text, SimpleGrid, Spinner, DialogRoot, DialogBackdrop, DialogPositioner, DialogContent, DialogHeader, DialogBody, DialogFooter, DialogTitle } from '@chakra-ui/react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { memberService } from '../services/memberService';
 import { committeeService } from '../services/committeeService';
 import { bidService } from '../services/bidService';
-import { IndianRupee, Calendar, User, Users, Building, FileText, TrendingUp } from 'lucide-react';
+import { IndianRupee, Users, Building, FileText, TrendingUp } from 'lucide-react';
 import type { CommitteMemberMapResponse } from '../services/authService';
 import { mapBidResponse, type Bid } from '../types/bid';
 
@@ -263,7 +263,7 @@ const ComitteDashboard: React.FC = () => {
 
         {loading && (
           <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" py={12} gap={4}>
-            <Spinner size="xl" color="red.500" thickness="4px" speed="0.65s" />
+            <Spinner size="xl" color="red.500" />
             <Text color="gray.400" fontSize="lg">Loading dashboard data...</Text>
           </Box>
         )}
@@ -278,7 +278,7 @@ const ComitteDashboard: React.FC = () => {
           <>
             <SimpleGrid columns={{ base: 1, sm: 2, lg: 4 }} gap={{ base: 3, sm: 4 }}>
               {/* Committees Tile */}
-              <Box as={Link} to="/committees">
+              <Link to="/committees">
                 <Box 
                   bg="gray.900" 
                   borderColor="gray.800" 
@@ -300,10 +300,10 @@ const ComitteDashboard: React.FC = () => {
                   <Text color="red.500" fontWeight="bold" fontSize="2xl" mb={0.5}>{stats.totalCommittees}</Text>
                   <Text color="gray.400" fontSize="xs">Your committees</Text>
                 </Box>
-              </Box>
+              </Link>
 
               {/* Members Tile */}
-              <Box as={Link} to="/profile">
+              <Link to="/profile">
                 <Box 
                   bg="gray.900" 
                   borderColor="gray.800" 
@@ -325,10 +325,10 @@ const ComitteDashboard: React.FC = () => {
                   <Text color="blue.400" fontWeight="bold" fontSize="2xl" mb={0.5}>{stats.totalMembers}</Text>
                   <Text color="gray.400" fontSize="xs">Across all committees</Text>
                 </Box>
-              </Box>
+              </Link>
 
               {/* Bids Tile */}
-              <Box as={Link} to="/bids">
+              <Link to="/bids">
                 <Box 
                   bg="gray.900" 
                   borderColor="gray.800" 
@@ -350,10 +350,10 @@ const ComitteDashboard: React.FC = () => {
                   <Text color="green.400" fontWeight="bold" fontSize="2xl" mb={0.5}>{stats.totalBids}</Text>
                   <Text color="gray.400" fontSize="xs">Total submissions</Text>
                 </Box>
-              </Box>
+              </Link>
 
               {/* Activity Tile */}
-              <Box as={Link} to="/about">
+              <Link to="/about">
                 <Box 
                   bg="gray.900" 
                   borderColor="gray.800" 
@@ -375,7 +375,7 @@ const ComitteDashboard: React.FC = () => {
                   <Text color="purple.400" fontWeight="bold" fontSize="2xl" mb={0.5}>{stats.recentActivity.length}</Text>
                   <Text color="gray.400" fontSize="xs">Recent actions</Text>
                 </Box>
-              </Box>
+              </Link>
             </SimpleGrid>
 
             {/* Four Information Sections */}
@@ -387,12 +387,14 @@ const ComitteDashboard: React.FC = () => {
                     <Text color="white" fontWeight="semibold" fontSize="md">My Committees</Text>
                     <Text color="gray.400" fontSize="xs" mt={0.5}>Committees you're part of</Text>
                   </Box>
-                  <Box as={Link} to="/committees" display="flex" alignItems="center" gap={1}>
+                  <Link to="/committees">
+                    <Box display="flex" alignItems="center" gap={1}>
                     <Text color="blue.400" fontSize="sm" cursor="pointer" _hover={{ textDecoration: "underline" }}>
                       View All
                     </Text>
                     <Text color="blue.400" fontSize="sm">→</Text>
-                  </Box>
+                    </Box>
+                  </Link>
                 </Box>
                 <Box px={3} py={2} maxH="300px" overflowY="auto">
                   {stats.myCommittees.length > 0 ? (
@@ -493,12 +495,14 @@ const ComitteDashboard: React.FC = () => {
                     <Text color="white" fontWeight="semibold" fontSize="md">Recent Bid Activity</Text>
                     <Text color="gray.400" fontSize="xs" mt={0.5}>Latest bids from your committees</Text>
                   </Box>
-                  <Box as={Link} to="/bids" display="flex" alignItems="center" gap={1}>
+                  <Link to="/bids">
+                    <Box display="flex" alignItems="center" gap={1}>
                     <Text color="blue.400" fontSize="sm" cursor="pointer" _hover={{ textDecoration: "underline" }}>
                       View All
                     </Text>
                     <Text color="blue.400" fontSize="sm">→</Text>
-                  </Box>
+                    </Box>
+                  </Link>
                 </Box>
                 <Box px={3} py={2} maxH="300px" overflowY="auto">
                   {stats.recentActivity.length > 0 ? (

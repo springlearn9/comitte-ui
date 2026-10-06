@@ -16,7 +16,6 @@ import {
   Textarea,
   Grid,
   GridItem,
-  Select as ChakraSelect,
   NativeSelectRoot,
   NativeSelectField,
 } from '@chakra-ui/react';

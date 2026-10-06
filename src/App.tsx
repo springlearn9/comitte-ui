@@ -11,6 +11,8 @@ import { Projects } from './pages/construction/projects';
 import { Materials } from './pages/construction/materials';
 import LabourDetails from './pages/construction/labour/LabourDetails';
 import PaymentDetailsPage from './pages/construction/payments/PaymentDetails';
+import PropertyDashboard from './pages/PropertyDashboard';
+import { PropertyDetails, PropertyListings } from './pages/property/properties';
 import { SignIn, SignUp, ForgotPassword, UserRegistration } from './pages/auth';
 import About from './pages/About';
 import Feedback from './pages/Feedback';
@@ -22,6 +24,18 @@ import Header from './components/layout/Header';
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
+
+const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <div className="flex min-h-screen bg-gray-950">
+    <Sidebar />
+    <div className="flex-1 flex flex-col">
+      <Header />
+      <main className="flex-1 p-4 sm:p-6">
+        {children}
+      </main>
+    </div>
+  </div>
+);
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
@@ -38,17 +52,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     return <Navigate to="/auth/signin" replace />;
   }
   
-  return (
-    <div className="flex min-h-screen bg-gray-950">
-      <Sidebar />
-      <div className="flex-1 flex flex-col">
-        <Header />
-        <main className="flex-1 p-4 sm:p-6">
-          {children}
-        </main>
-      </div>
-    </div>
-  );
+  return <AppShell>{children}</AppShell>;
 };
 
 const AppContent: React.FC = () => {
@@ -138,6 +142,32 @@ const AppContent: React.FC = () => {
           <ProtectedRoute>
             <PaymentDetailsPage />
           </ProtectedRoute>
+        }
+      />
+
+      {/* Property Routes */}
+      <Route
+        path="/property-dashboard"
+        element={
+          <ProtectedRoute>
+            <PropertyDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/property/listings"
+        element={
+          <AppShell>
+            <PropertyListings />
+          </AppShell>
+        }
+      />
+      <Route
+        path="/property/listings/:id"
+        element={
+          <AppShell>
+            <PropertyDetails />
+          </AppShell>
         }
       />
       

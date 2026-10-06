@@ -9,6 +9,7 @@ import {
   Grid3X3,
   User,
   Building,
+  Home,
   Package,
   Users,
   CreditCard
@@ -66,6 +67,16 @@ const Sidebar: React.FC = () => {
       icon: <CreditCard className="w-5 h-5" />,
       label: 'Payments',
       path: '/construction/payments',
+    },
+    {
+      icon: <Home className="w-5 h-5" />,
+      label: 'Property',
+      path: '/property-dashboard',
+    },
+    {
+      icon: <Home className="w-5 h-5" />,
+      label: 'Property Listings',
+      path: '/property/listings',
     },
     {
       icon: <User className="w-5 h-5" />,
