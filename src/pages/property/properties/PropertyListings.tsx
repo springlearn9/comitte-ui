@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Badge, Box, Button, Grid, GridItem, Image, Input, NativeSelectField, NativeSelectRoot, Tabs, Text } from '@chakra-ui/react';
-import { Check, Edit, Heart, Plus, Search, Star, Trash2 } from 'lucide-react';
+import { Check, Edit, Heart, Phone, Plus, Search, Star, Trash2, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import CreateEditPropertyModal from './CreateEditPropertyModal';
 import { useAuth } from '../../../hooks/useAuth';
@@ -20,8 +20,16 @@ const listingTypes: ListingType[] = ['SELL', 'RENT'];
 const furnishingTypes: FurnishingStatus[] = ['UNFURNISHED', 'SEMI_FURNISHED', 'FULLY_FURNISHED'];
 
 const formatCurrency = (value?: number) => {
-  if (value == null) return 'Rs 0';
-  return `Rs ${Math.round(value).toLocaleString()}`;
+  if (value == null) return '₹0';
+
+  const abs = Math.abs(value);
+  if (abs >= 10000000) {
+    return `₹${(value / 10000000).toFixed(2).replace(/\.00$/, '')}Cr`;
+  }
+  if (abs >= 100000) {
+    return `₹${(value / 100000).toFixed(2).replace(/\.00$/, '')}L`; 
+  }
+  return `₹${Math.round(value).toLocaleString()}`;
 };
 
 const formatDate = (iso?: string) => {
@@ -42,6 +50,48 @@ const getPrimaryMedia = (property: PropertyResponse) => {
   return media.find((item) => item.isPrimary) || media[0];
 };
 
+const getPropertyBadgeVariant = (property: PropertyResponse) => {
+  const seed = Number(property.id || 0);
+  const variant = seed % 3;
+
+  if (variant === 0) {
+    return {
+      type: 'verified',
+      label: 'VERIFIED',
+      bg: 'linear-gradient(90deg, #22c55e 0%, #16a34a 100%)',
+      text: 'white',
+      border: 'rgba(255,255,255,0.25)',
+      iconBg: 'rgba(255,255,255,0.2)',
+      iconColor: 'white',
+      icon: Check,
+    };
+  }
+
+  if (variant === 1) {
+    return {
+      type: 'standard',
+      label: 'STANDARD',
+      bg: 'linear-gradient(90deg, #2563eb 0%, #1d4ed8 100%)',
+      text: 'white',
+      border: 'rgba(255,255,255,0.25)',
+      iconBg: 'rgba(255,255,255,0.18)',
+      iconColor: 'white',
+      icon: Check,
+    };
+  }
+
+  return {
+    type: 'unverified',
+    label: 'UNVERIFIED',
+    bg: 'linear-gradient(90deg, #ffffff 0%, #f8fafc 100%)',
+    text: '#dc2626',
+    border: '#fca5a5',
+    iconBg: 'rgba(239,68,68,0.12)',
+    iconColor: '#dc2626',
+    icon: X,
+  };
+};
+
 const ListingTile: React.FC<{
   item: PropertyListItem;
   property: PropertyResponse;
@@ -59,6 +109,18 @@ const ListingTile: React.FC<{
   const activeMedia = mediaItems.length > 0
     ? mediaItems[activeImageIndex] || mediaItems[0]
     : primaryMedia || undefined;
+  const badge = getPropertyBadgeVariant(property);
+  const BadgeIcon = badge.icon;
+
+  useEffect(() => {
+    if (mediaItems.length <= 1) return;
+
+    const timer = window.setInterval(() => {
+      setActiveImageIndex((prev) => (prev + 1) % mediaItems.length);
+    }, 2000);
+
+    return () => window.clearInterval(timer);
+  }, [mediaItems.length]);
 
   return (
     <Box
@@ -72,8 +134,10 @@ const ListingTile: React.FC<{
       transition="all 0.2s ease"
       onClick={onView}
       cursor={onView ? 'pointer' : 'default'}
+      maxW="320px"
+      mx="auto"
     >
-      <Box position="relative" h={{ base: '260px', md: '300px' }} bg="gray.100">
+      <Box position="relative" h={{ base: '200px', md: '220px' }} bg="gray.100">
         {activeMedia?.mediaUrl ? (
           activeMedia.mediaType === 'VIDEO' ? (
             <video src={activeMedia.mediaUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} muted autoPlay loop playsInline />
@@ -87,8 +151,31 @@ const ListingTile: React.FC<{
         )}
 
         <Box position="absolute" top={3} left={3} display="flex" gap={2} alignItems="center">
-          <Box display="inline-flex" alignItems="center" justifyContent="center" w={8} h={8} bg="rgba(34, 197, 94, 0.96)" color="white" rounded="md" borderWidth="1px" borderColor="rgba(255,255,255,0.25)">
-            <Check size={14} />
+          <Box
+            display="inline-flex"
+            alignItems="center"
+            gap={1.5}
+            px={2.5}
+            py={1}
+            rounded="full"
+            bg={badge.bg}
+            borderWidth="1px"
+            borderColor={badge.border}
+            boxShadow="sm"
+          >
+            <Box
+              display="inline-flex"
+              alignItems="center"
+              justifyContent="center"
+              w={6}
+              h={6}
+              rounded="full"
+              bg={badge.iconBg}
+              color={badge.iconColor}
+            >
+              <BadgeIcon size={11} strokeWidth={3} />
+            </Box>
+            <Text color={badge.text} fontSize="10px" fontWeight="bold" letterSpacing="0.02em">{badge.label}</Text>
           </Box>
         </Box>
 
@@ -138,9 +225,9 @@ const ListingTile: React.FC<{
         </Box>
 
         <Box position="absolute" bottom={3} left={3} right={3} display="flex" alignItems="flex-end" justifyContent="space-between">
-          <Box bg="rgba(15, 23, 42, 0.72)" borderWidth="1px" borderColor="rgba(255,255,255,0.22)" px={3} py={2} rounded="lg">
-            <Text color="white" fontSize="lg" fontWeight="bold">{formatCurrency(item.price)}</Text>
-            <Text color="gray.200" fontSize="10px" fontWeight="medium">
+          <Box bg="rgba(15, 23, 42, 0.72)" borderWidth="1px" borderColor="rgba(255,255,255,0.22)" px={2.5} py={1.25} rounded="lg">
+            <Text color="white" fontSize="xs" fontWeight="bold">{formatCurrency(item.price)}</Text>
+            <Text color="gray.200" fontSize="8px" fontWeight="medium">
               {property.possessionStatus ? `${formatPropertyType(property.possessionStatus)} · ` : ''}
               {formatDate(item.createdAt) || 'New listing'}
             </Text>
@@ -186,57 +273,57 @@ const ListingTile: React.FC<{
         )}
       </Box>
 
-      <Box p={{ base: 4, md: 5 }} display="flex" flexDirection="column" gap={4}>
+      <Box p={{ base: 3, md: 3.5 }} display="flex" flexDirection="column" gap={3}>
         <Box>
-          <Box display="flex" alignItems="center" justifyContent="space-between" gap={3}>
-            <Text as="h3" color="white" fontWeight="semibold" fontSize={{ base: 'lg', md: 'xl' }} lineHeight="1.2" lineClamp={1}>{item.title}</Text>
-            <Badge bg="red.500/10" color="red.300" borderWidth="1px" borderColor="red.400/30" px={2.5} py={1} rounded="md" fontSize="xs" fontWeight="bold">RESALE</Badge>
+          <Box display="flex" alignItems="center" justifyContent="space-between" gap={2}>
+            <Text as="h3" color="white" fontWeight="semibold" fontSize={{ base: 'sm', md: 'md' }} lineHeight="1.2" lineClamp={1}>{item.title}</Text>
+            <Badge bg="red.500/10" color="red.300" borderWidth="1px" borderColor="red.400/30" px={2} py={0.5} rounded="md" fontSize="9px" fontWeight="bold">RESALE</Badge>
           </Box>
 
-          <Text color="gray.300" fontSize={{ base: 'sm', md: 'sm' }} mt={1} lineClamp={1}>
+          <Text color="gray.300" fontSize="11px" mt={1} lineClamp={1}>
             {property.bedrooms ? `${property.bedrooms} BHK` : '-'} {formatPropertyType(property.propertyType)} in {location || 'Location'}
           </Text>
 
-          <Box mt={3}>
-            <Text color="gray.400" fontSize="sm">{property.areaSqFt ? `${property.areaSqFt} sqyd` : '—'}</Text>
+          <Box mt={2}>
+            <Text color="gray.400" fontSize="11px">{property.areaSqFt ? `${property.areaSqFt} sq ft` : '—'}</Text>
           </Box>
 
-          <Grid templateColumns={{ base: '1fr 1fr', md: 'repeat(3, minmax(0, 1fr))' }} gap={3} mt={4}>
-            <Box bg="gray.950" borderWidth="1px" borderColor="gray.800" rounded="lg" p={2.5}>
-              <Text color="gray.400" fontSize="xs">Area</Text>
-              <Text color="white" fontWeight="semibold" fontSize="sm">{property.areaSqFt ? `${property.areaSqFt} sqyd` : '—'}</Text>
+          <Grid templateColumns={{ base: '1fr 1fr', md: 'repeat(3, minmax(0, 1fr))' }} gap={2} mt={3}>
+            <Box bg="gray.950" borderWidth="1px" borderColor="gray.800" rounded="md" p={2}>
+              <Text color="gray.400" fontSize="9px">Area</Text>
+              <Text color="white" fontWeight="semibold" fontSize="11px">{property.areaSqFt ? `${property.areaSqFt} sq ft` : '—'}</Text>
             </Box>
-            <Box bg="gray.950" borderWidth="1px" borderColor="gray.800" rounded="lg" p={2.5}>
-              <Text color="gray.400" fontSize="xs">Bedroom</Text>
-              <Text color="white" fontWeight="semibold" fontSize="sm">{property.bedrooms ? `${property.bedrooms} BHK` : '—'}</Text>
+            <Box bg="gray.950" borderWidth="1px" borderColor="gray.800" rounded="md" p={2}>
+              <Text color="gray.400" fontSize="9px">Bedroom</Text>
+              <Text color="white" fontWeight="semibold" fontSize="11px">{property.bedrooms ? `${property.bedrooms} BHK` : '—'}</Text>
             </Box>
-            <Box bg="gray.950" borderWidth="1px" borderColor="gray.800" rounded="lg" p={2.5}>
-              <Text color="gray.400" fontSize="xs">Status</Text>
-              <Text color="white" fontWeight="semibold" fontSize="sm">{property.status}</Text>
+            <Box bg="gray.950" borderWidth="1px" borderColor="gray.800" rounded="md" p={2}>
+              <Text color="gray.400" fontSize="9px">Status</Text>
+              <Text color="white" fontWeight="semibold" fontSize="11px">{property.status}</Text>
             </Box>
           </Grid>
 
-          <Box mt={4} display="flex" alignItems="center" gap={2} flexWrap="wrap">
+          <Box mt={3} display="flex" alignItems="center" gap={2} flexWrap="wrap">
             {nearbyTags.length > 0 ? nearbyTags.map((tag) => (
-              <Badge key={tag} bg="gray.800" borderWidth="1px" borderColor="gray.700" color="gray.200" rounded="md" px={2.5} py={1} fontSize="xs">{tag}</Badge>
+              <Badge key={tag} bg="gray.800" borderWidth="1px" borderColor="gray.700" color="gray.200" rounded="md" px={2} py={0.5} fontSize="9px">{tag}</Badge>
             )) : (
-              <Text color="gray.500" fontSize="sm">No nearby highlights</Text>
+              <Text color="gray.500" fontSize="11px">No nearby highlights</Text>
             )}
           </Box>
 
-          <Text color="gray.400" fontSize="sm" mt={3} lineClamp={2}>
+          <Text color="gray.400" fontSize="11px" mt={2} lineClamp={2}>
             {property.description || `Discover ${property.bedrooms ? `${property.bedrooms} BHK` : 'this home'} in ${location || 'this location'} with premium amenities and convenient access.`}
           </Text>
         </Box>
 
-        <Box pt={3} borderTopWidth="1px" borderColor="gray.800" display="flex" alignItems="center" justifyContent="space-between" gap={3} flexWrap="wrap">
-          <Box display="flex" alignItems="center" gap={3}>
-            <Box w={10} h={10} rounded="full" bg="gray.800" borderWidth="1px" borderColor="gray.700" display="flex" alignItems="center" justifyContent="center">
-              <Text color="gray.200" fontSize="xs" fontWeight="bold">P</Text>
+        <Box pt={2} borderTopWidth="1px" borderColor="gray.800" display="flex" alignItems="center" justifyContent="space-between" gap={2} flexWrap="wrap">
+          <Box display="flex" alignItems="center" gap={2}>
+            <Box w={8} h={8} rounded="full" bg="gray.800" borderWidth="1px" borderColor="gray.700" display="flex" alignItems="center" justifyContent="center">
+              <Text color="gray.200" fontSize="9px" fontWeight="bold">P</Text>
             </Box>
             <Box>
-              <Text color="white" fontWeight="semibold" fontSize="sm">{property.ownerBrokerName || `Member ${property.ownerBrokerId}`}</Text>
-              <Text color="gray.400" fontSize="xs">Featured dealer</Text>
+              <Text color="white" fontWeight="semibold" fontSize="11px">{property.ownerBrokerName || `Member ${property.ownerBrokerId}`}</Text>
+              <Text color="gray.400" fontSize="9px">Featured dealer</Text>
             </Box>
           </Box>
 
@@ -245,7 +332,10 @@ const ListingTile: React.FC<{
               variant="outline"
               borderColor="gray.700"
               color="gray.100"
-              borderRadius="lg"
+              borderRadius="md"
+              px={2.5}
+              minH="30px"
+              fontSize="11px"
               _hover={{ bg: 'gray.800', borderColor: 'gray.600' }}
               onClick={(e) => {
                 e.stopPropagation();
@@ -257,14 +347,19 @@ const ListingTile: React.FC<{
             <Button
               bg="red.500"
               color="white"
-              borderRadius="lg"
+              borderRadius="full"
+              w="30px"
+              h="30px"
+              minW="30px"
+              p={0}
               _hover={{ bg: 'red.600' }}
               onClick={(e) => {
                 e.stopPropagation();
                 onView?.();
               }}
+              aria-label="Call property owner"
             >
-              Contact
+              <Phone size={14} />
             </Button>
             {onEdit && onDelete && (
               <>
@@ -275,13 +370,13 @@ const ListingTile: React.FC<{
                     onEdit?.();
                   }}
                   title="Edit"
-                  p={2}
+                  p={1.5}
                   _hover={{ bg: 'gray.800', color: 'red.300' }}
                   rounded="full"
                   color="red.300"
                   cursor="pointer"
                 >
-                  <Edit size={18} />
+                  <Edit size={14} />
                 </Box>
                 <Box
                   as="button"
@@ -290,13 +385,13 @@ const ListingTile: React.FC<{
                     onDelete?.();
                   }}
                   title="Delete"
-                  p={2}
+                  p={1.5}
                   _hover={{ bg: 'gray.800', color: 'red.300' }}
                   rounded="full"
                   color="red.300"
                   cursor="pointer"
                 >
-                  <Trash2 size={18} />
+                  <Trash2 size={14} />
                 </Box>
               </>
             )}

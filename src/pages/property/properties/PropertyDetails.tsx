@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Grid, GridItem, Image, Stack, Text } from '@chakra-ui/react';
+import { Box, Button, Grid, GridItem, Image, Stack, Text } from '@chakra-ui/react';
+import { Edit } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
+import { useAuth } from '../../../hooks/useAuth';
 import { propertyService } from '../../../services/propertyService';
 import { propertyMediaService } from '../../../services/propertyMediaService';
 import type { PropertyMedia, PropertyResponse } from '../../../types/property';
+import CreateEditPropertyModal from './CreateEditPropertyModal';
 
 const formatCurrency = (value?: number) => {
   if (value == null) return 'Rs 0';
@@ -12,37 +15,40 @@ const formatCurrency = (value?: number) => {
 
 const PropertyDetails: React.FC = () => {
   const { id } = useParams();
+  const { isAuthenticated } = useAuth();
   const [property, setProperty] = useState<PropertyResponse | null>(null);
   const [media, setMedia] = useState<PropertyMedia[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+
+  const loadProperty = async () => {
+    if (!id) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await propertyService.getById(Number(id));
+      const inlineMedia = data.media || [];
+      if (inlineMedia.length > 0) {
+        setMedia(inlineMedia);
+      } else {
+        try {
+          const fallbackMedia = await propertyMediaService.getPropertyMedia(Number(id));
+          setMedia(fallbackMedia || []);
+        } catch {
+          setMedia([]);
+        }
+      }
+      setProperty(data);
+    } catch (err: any) {
+      setError(err?.response?.data?.message || err?.message || 'Failed to load property details');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const load = async () => {
-      if (!id) return;
-      setLoading(true);
-      setError(null);
-      try {
-        const data = await propertyService.getById(Number(id));
-        const inlineMedia = data.media || [];
-        if (inlineMedia.length > 0) {
-          setMedia(inlineMedia);
-        } else {
-          try {
-            const fallbackMedia = await propertyMediaService.getPropertyMedia(Number(id));
-            setMedia(fallbackMedia || []);
-          } catch {
-            setMedia([]);
-          }
-        }
-        setProperty(data);
-      } catch (err: any) {
-        setError(err?.response?.data?.message || err?.message || 'Failed to load property details');
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
+    void loadProperty();
   }, [id]);
 
   if (loading) {
@@ -82,9 +88,25 @@ const PropertyDetails: React.FC = () => {
           <Text as="h1" fontSize="xl" fontWeight="bold" color="white" mb={1}>{property.title}</Text>
           <Text color="gray.400" fontSize="xs">{property.propertyType} • {property.listingType} • {property.status}</Text>
         </Box>
-        <Link to="/property/listings">
-          <Text color="red.400" fontSize="sm" _hover={{ color: 'red.300' }}>Back to listings</Text>
-        </Link>
+        <Stack direction="row" align="center" gap={2}>
+          <Link to="/property/listings">
+            <Text color="red.400" fontSize="sm" _hover={{ color: 'red.300' }}>Back to listings</Text>
+          </Link>
+          {isAuthenticated && (
+            <Button
+              size="sm"
+              bg="red.500"
+              color="white"
+              _hover={{ bg: 'red.600' }}
+              onClick={() => setIsEditOpen(true)}
+            >
+              <Box as="span" display="inline-flex" alignItems="center" gap={1}>
+                <Edit size={14} />
+                Edit
+              </Box>
+            </Button>
+          )}
+        </Stack>
       </Box>
 
       <Grid templateColumns={{ base: '1fr', lg: '2fr 1fr' }} gap={4}>
@@ -221,6 +243,16 @@ const PropertyDetails: React.FC = () => {
           </Stack>
         </GridItem>
       </Grid>
+
+      <CreateEditPropertyModal
+        isOpen={isEditOpen}
+        onClose={() => setIsEditOpen(false)}
+        property={property}
+        onSuccess={async () => {
+          setIsEditOpen(false);
+          await loadProperty();
+        }}
+      />
     </Box>
   );
 };
